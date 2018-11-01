@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.meluzin.fluentxml</groupId>
   <artifactId>com.meluzin.fluentxml</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0</version>
   <name>com.meluzin.fluentxml</name>
   <properties> 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -24,7 +24,7 @@
   	<dependency>
   		<groupId>com.meluzin.lib</groupId>
   		<artifactId>com.meluzin.lib.functional</artifactId>
-  		<version>1.0-SNAPSHOT</version>
+  		<version>1.0</version>
   	</dependency>
     <dependency>
       <groupId>junit</groupId>
