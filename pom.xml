@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.github.jiri-meluzin</groupId>
     <artifactId>io.github.jiri-meluzin.fluentxml</artifactId>
-    <version>1.0.1</version>
+    <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 	<distributionManagement>
 		<snapshotRepository>
@@ -107,7 +107,7 @@
 	<profiles>
 		<!-- GPG Signature on release -->
 		<profile>
-			<id>myprofile</id>
+			<id>ossrh</id>
 			<activation>
 				<property>
 					<name>performRelease</name>

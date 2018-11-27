@@ -4,12 +4,12 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.github.jiri-meluzin</groupId>
 	<artifactId>io.github.jiri-meluzin.lib.functional</artifactId>
-	<version>1.0.1</version>
+	<version>1.0-SNAPSHOT</version>
 	<name>io.github.jiri-meluzin.lib.functional</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-	</properties>
+	</properties>  
 	<distributionManagement>
 		<snapshotRepository>
 			<id>ossrh</id>
@@ -22,6 +22,7 @@
 	</distributionManagement>
 	<build>
 		<plugins>
+		                      
 			<plugin>
 				<groupId>org.sonatype.plugins</groupId>
 				<artifactId>nexus-staging-maven-plugin</artifactId>
@@ -93,7 +94,7 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-	<url>https://github.com/jiri-meluzin/FluentXMLLib</url>
+                         <url>https://github.com/jiri-meluzin/FluentXMLLib</url>
 	<description>Java library</description>
 	<scm>
 		<url>https://github.com/jiri-meluzin/FluentXMLLib.git</url>
@@ -118,7 +119,7 @@
 	<profiles>
 		<!-- GPG Signature on release -->
 		<profile>
-			<id>myprofile</id>
+			<id>ossrh</id>
 			<activation>
 				<property>
 					<name>performRelease</name>
