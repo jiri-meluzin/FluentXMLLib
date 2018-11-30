@@ -12,7 +12,6 @@ import java.util.Base64;
 
 public class ProxyTester {
 	public static void main(String[] args) throws MalformedURLException, IOException {
-		// rdmproxy.rdm.cz 8080 http://google.com rdm.cz\extmeluzinj Romanka1988
 		System.out.println(args[0]+":"+ Integer.parseInt(args[1]));
 		//Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(args[0], Integer.parseInt(args[1])));
 
