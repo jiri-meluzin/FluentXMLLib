@@ -19,32 +19,17 @@ import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+
+import com.meluzin.ioutils.FileStreamIterable;
+import com.meluzin.ioutils.FileStreamIterator;
 
 public class FileSearcher {
 
 	public List<Path> searchFiles(Path path, String filePattern, boolean recursive) {
-
-		final PathMatcher matcher = FileSystems.getDefault().getPathMatcher(filePattern);
-		Path start = path;
-		final List<Path> files = new ArrayList<>();
-		try {
-			Files.walkFileTree(start,  EnumSet.of(FileVisitOption.FOLLOW_LINKS), recursive ? Integer.MAX_VALUE : 1,  new SimpleFileVisitor<Path>() {
-				@Override
-				public FileVisitResult visitFile(Path filePath,
-						BasicFileAttributes attrs) throws IOException {
-					boolean matches = matcher.matches(filePath);
-					if (matches) {
-						files.add(filePath.normalize());	
-					}
-					return FileVisitResult.CONTINUE;
-				}
-			});
-			return files;
-		} catch (IOException e) {
-			throw new RuntimeException("Cannot search files", e);
-		}
+		return StreamSupport.stream(FileStreamIterable.searchFiles(path, filePattern, true, recursive).spliterator(), false).collect(Collectors.toList());
 	}
 	public Stream<Path> iterateFiles(Path path, String filePattern, boolean recursive) {
 		PathMatcher matcher = FileSystems.getDefault().getPathMatcher(filePattern);
