@@ -1,6 +1,7 @@
 package com.meluzin.ioutils;
 
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Iterator;
@@ -60,22 +61,24 @@ public class FileStreamIterator implements Iterator<Path> {
 				return;
 			}
 			increase();
-			Files.newDirectoryStream(bwSourcePath).forEach(f -> {
-				if (isError()) {
-					return;
-				}
-				if (Files.isDirectory(f) && isRecursive()) {
-					increase();
-					if (isParallel()) {
-						commonPool.submit(() -> processSubdir(commonPool, f));
-					} else {
-						processSubdir(commonPool, f);
+			try (DirectoryStream<Path> dirStream = Files.newDirectoryStream(bwSourcePath)) {
+				dirStream.forEach(f -> {
+					if (isError()) {
+						return;
 					}
-				}
-				if (fileMatcher.test(f)) {
-					insertPath(f);
-				}
-			});
+					if (Files.isDirectory(f) && isRecursive()) {
+						increase();
+						if (isParallel()) {
+							commonPool.submit(() -> processSubdir(commonPool, f));
+						} else {
+							processSubdir(commonPool, f);
+						}
+					}
+					if (fileMatcher.test(f)) {
+						insertPath(f);
+					}
+				});
+			}
 			decrease();
 			onFinished(commonPool);
 		} catch (IOException e) {
