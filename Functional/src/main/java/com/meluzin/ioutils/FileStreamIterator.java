@@ -8,6 +8,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ForkJoinPool;
 import java.util.function.Predicate;
 
+import com.meluzin.functional.T;
+import com.meluzin.functional.T.V2;
+
 
 public class FileStreamIterator implements Iterator<Path> {
 	private boolean finished = false;
@@ -15,14 +18,27 @@ public class FileStreamIterator implements Iterator<Path> {
 	private Predicate<Path> fileMatcher = p -> true;
 	private boolean parallel = true;
 	private boolean recursive = true;
-	private ConcurrentLinkedQueue<Path> queue = new ConcurrentLinkedQueue<>();
+	private boolean error = false;
+	private ConcurrentLinkedQueue<T.V2<Path, Throwable>> queue = new ConcurrentLinkedQueue<>();
 	public FileStreamIterator(Path start, boolean parallel, Predicate<Path> fileMatcher, boolean recursive) {
 		this.parallel = parallel;
 		this.fileMatcher = fileMatcher;
 		this.recursive = recursive;
 		ForkJoinPool commonPool = ForkJoinPool.commonPool();
-		commonPool.submit(() -> searchDir(start, commonPool));
+		commonPool.submit(() -> {
+			try {
+				searchDir(start, commonPool);
+			} catch (Exception ex) {
+				insertThrowable(ex);
+			}
+		});
 		
+	}
+	public boolean isError() {
+		return error;
+	}
+	public void setError(boolean error) {
+		this.error = error;
 	}
 	private synchronized void increase() {
 		processing ++;
@@ -39,8 +55,15 @@ public class FileStreamIterator implements Iterator<Path> {
 	}
 	private void searchDir(Path bwSourcePath, ForkJoinPool commonPool )  {
 		try {
+			if (isError()) {
+				onFinished(commonPool);
+				return;
+			}
 			increase();
 			Files.newDirectoryStream(bwSourcePath).forEach(f -> {
+				if (isError()) {
+					return;
+				}
 				if (Files.isDirectory(f) && isRecursive()) {
 					increase();
 					if (isParallel()) {
@@ -68,12 +91,21 @@ public class FileStreamIterator implements Iterator<Path> {
 		//if (isParallel() && getProcessing() == 0) commonPool.shutdown();
 	}
 	private void processSubdir(ForkJoinPool commonPool, Path f) {
-		searchDir(f, commonPool);
+		try {
+			searchDir(f, commonPool);
+		} catch (Exception e) {
+			insertThrowable(e);
+		}
 		decrease();
 		onFinished(commonPool);
 	}
 	public synchronized void insertPath(Path path) {
-		queue.add(path);
+		queue.add(T.V(path, null));
+		FileStreamIterator.this.notifyAll();
+	}
+	public synchronized void insertThrowable(Throwable throwable) {
+		setError(true);
+		queue.add(T.V(null, throwable));
 		FileStreamIterator.this.notifyAll();
 	}
 	public boolean isFinished() {
@@ -97,7 +129,9 @@ public class FileStreamIterator implements Iterator<Path> {
 
 	@Override
 	public Path next() {
-		return queue.poll();
+		V2<Path, Throwable> poll = queue.poll();
+		if (poll.getB() != null) throw new RuntimeException("Could not finish searching", poll.getB());
+		return poll.getA();
 	}
 
 	
