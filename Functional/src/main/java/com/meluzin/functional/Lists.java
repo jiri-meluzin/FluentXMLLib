@@ -1,8 +1,10 @@
 package com.meluzin.functional;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.StreamSupport;
 
 public class Lists {
@@ -10,6 +12,14 @@ public class Lists {
 	@SuppressWarnings("hiding")
 	public static <T> List<T> asList(T... items) {
 		List<T> l = new ArrayList<T>();
+		for (int i = 0; i < items.length; i++)
+			l.add(items[i]);
+		return l;
+	}
+	@SuppressWarnings("hiding")
+	@SafeVarargs
+	public static <T> Set<T> asSet(T... items) {
+		Set<T> l = new HashSet<T>();
 		for (int i = 0; i < items.length; i++)
 			l.add(items[i]);
 		return l;
