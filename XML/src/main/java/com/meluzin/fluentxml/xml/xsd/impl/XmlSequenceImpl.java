@@ -63,6 +63,7 @@ public class XmlSequenceImpl extends BaseXmlNode<XmlSequence> implements XmlSequ
 				addAny().loadFromNode(child);
 			}
 			else if (child.isTextNode()) {}
+			else if ("annotation".equals(child.getName())) {}
 			else throw new RuntimeException("not support node name: " + node);
 		}
 		return this;

@@ -87,10 +87,13 @@ public class XmlBuilderFactory {
 		try {
 			transformer = tf.newTransformer();
 			if (prettyPrint) {
+				transformer.setOutputProperty(OutputKeys.DOCTYPE_PUBLIC, "");
 				transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 				transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
 			}
-			transformer.transform(new DOMSource(document), result);
+			document.setXmlStandalone(true);
+			DOMSource xmlSource = new DOMSource(document);
+			transformer.transform(xmlSource, result);
 		} catch (TransformerConfigurationException e) {
 			throw new RuntimeException("Could not render document", e);
 		} catch (TransformerException e) {

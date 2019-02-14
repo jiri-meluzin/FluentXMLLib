@@ -114,6 +114,7 @@ public class SchemaLoader {
 	private Stream<SchemaReference> loadWSDLReferences(Path source, NodeBuilder sourceXml) {
 		return sourceXml.
 					search(true, c -> ("import".equals(c.getName()) || "include".equals(c.getName())) && wsdlNamespace.equals(c.getNamespace())).
+					filter(n -> n.hasAttribute("location")).
 					map(n -> new SchemaReference(n.getAttribute("namespace"), Paths.get(n.getAttribute("location")), source, n, SchemaType.WSDL));
 	}
 }
