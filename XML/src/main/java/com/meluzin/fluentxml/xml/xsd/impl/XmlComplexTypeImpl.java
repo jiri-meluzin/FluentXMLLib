@@ -70,6 +70,11 @@ public class XmlComplexTypeImpl extends XmlTypeImpl<XmlComplexType> implements X
 	public String getContentType() {
 		return contentType;
 	}
+	@Override
+	public XmlComplexType setContentType(String contentType) {
+		this.contentType = contentType;
+		return this;
+	}
 	public NodeBuilder render(NodeBuilder parent) {
 		NodeBuilder type = parent.addChild("complexType").addAttribute("name", getName());
 		NodeBuilder childElements = type;

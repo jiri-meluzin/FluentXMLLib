@@ -128,6 +128,7 @@ public interface XmlNode<T extends BaseBuilder<T>> extends BaseBuilder<T> {
 		public XmlComplexType setBaseTypeSimple(boolean isSimple);
 		public List<XmlNode<?>> getChildren();
 		public String getContentType();
+		public XmlComplexType setContentType(String contentType);
 		//public List<XmlAttribute> getAttributes();
 		public void duplicateInSchema(XmlComplexType targetElement, Set<String> changeToTargetNamespace);
 	}
