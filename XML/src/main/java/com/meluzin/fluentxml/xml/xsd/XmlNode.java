@@ -116,7 +116,7 @@ public interface XmlNode<T extends BaseBuilder<T>> extends BaseBuilder<T> {
 		public String getBaseTypeNamespace();
 		public T setBaseTypeNamespace(String name);
 	}
-	public interface XmlComplexType extends XmlType<XmlComplexType> {
+	public interface XmlComplexType extends XmlType<XmlComplexType>, XmlStructureContainer<XmlComplexType> {
 		public XmlElement addElement(String name);
 		public XmlAttribute addAttribute(String name);
 		public XmlChoice addChoice();
@@ -165,14 +165,29 @@ public interface XmlNode<T extends BaseBuilder<T>> extends BaseBuilder<T> {
 		public XmlChoice addChoice();
 		public List<XmlNode<?>> getChildren();
 	}
-	public interface XmlChoice extends XmlNode<XmlChoice> {
+	public interface XmlStructureContainer<T extends XmlStructureContainer<T>> extends XmlNode<T> {
+		public XmlElement addElement(String name);	
+		public XmlChoice addChoice();
+		public XmlGroup addGroup();
+		public XmlAny addAny();	
+		public String getMinOccurs();
+		public T setMinOccurs(String minOccurs);
+		public String getMaxOccurs();
+		public T setMaxOccurs(String name);
+		public List<XmlNode<?>> getChildren();		
+	}
+	public interface XmlChoice extends XmlStructureContainer<XmlChoice> {
 		public XmlElement addElement(String name);
 		public XmlSequence addSequence();
 		public XmlGroup addGroup();
+		public String getMinOccurs();
+		public XmlChoice setMinOccurs(String minOccurs);
+		public String getMaxOccurs();
+		public XmlChoice setMaxOccurs(String name);
 		public List<XmlNode<?>> getChildren();		
 		public void duplicateInSchema(XmlChoice targetElement, Set<String> changeToTargetNamespace);
 	}
-	public interface XmlSequence extends XmlNode<XmlSequence> {
+	public interface XmlSequence extends XmlStructureContainer<XmlSequence> {
 		public XmlElement addElement(String name);
 		public XmlChoice addChoice();
 		public XmlGroup addGroup();
@@ -180,11 +195,13 @@ public interface XmlNode<T extends BaseBuilder<T>> extends BaseBuilder<T> {
 		public List<XmlNode<?>> getChildren();		
 		public void duplicateInSchema(XmlSequence targetElement, Set<String> changeToTargetNamespace);
 	}
-	public interface XmlAll extends XmlNode<XmlAll> {
+	public interface XmlAll extends XmlStructureContainer<XmlAll> {
 		public XmlElement addElement(String name);
 		public List<XmlNode<?>> getChildren();		
 		public String getMinOccurs();
 		public XmlAll setMinOccurs(String minOccurs);
+		public String getMaxOccurs();
+		public XmlAll setMaxOccurs(String name);
 		public void duplicateInSchema(XmlAll targetElement, Set<String> changeToTargetNamespace);
 	}
 	public interface XmlSchema extends BaseSchema, XmlNode<XmlSchema> {

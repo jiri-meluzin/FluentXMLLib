@@ -6,6 +6,7 @@ import java.util.Set;
 
 import com.meluzin.fluentxml.xml.builder.NodeBuilder;
 import com.meluzin.fluentxml.xml.xsd.XmlNode;
+import com.meluzin.fluentxml.xml.xsd.XmlNode.XmlComplexType;
 import com.meluzin.fluentxml.xml.xsd.XmlNode.XmlSequence;
 
 public class XmlSequenceImpl extends BaseXmlNode<XmlSequence> implements XmlSequence {
@@ -83,5 +84,21 @@ public class XmlSequenceImpl extends BaseXmlNode<XmlSequence> implements XmlSequ
 				throw new UnsupportedOperationException("Not supported XmlNode type: " + node);
 			}
 		}		
+	}
+	@Override
+	public String getMinOccurs() {
+		throw new UnsupportedOperationException("XmlSequence does not support minOccurs");
+	}
+	@Override
+	public XmlSequence setMinOccurs(String minOccurs) {
+		throw new UnsupportedOperationException("XmlSequence does not support minOccurs");
+	}
+	@Override
+	public String getMaxOccurs() {
+		throw new UnsupportedOperationException("XmlSequence does not support maxOccurs");
+	}
+	@Override
+	public XmlSequence setMaxOccurs(String name) {
+		throw new UnsupportedOperationException("XmlSequence does not support maxOccurs");
 	}
 }

@@ -11,13 +11,14 @@ import com.meluzin.fluentxml.xml.xsd.XmlNode.XmlAll;
 public class XmlAllImpl extends BaseXmlNode<XmlAll> implements XmlAll {
 	private List<XmlNode<?>> elements = new ArrayList<>();
 	private String minOccurs;
+	private String maxOccurs;
 	public XmlAllImpl(XmlNode<?> parent) {
 		super(parent);
 	}
 
 	@Override
 	public NodeBuilder render(NodeBuilder parent) {
-		NodeBuilder all = parent.addChild("all").addAttribute("minOccurs", minOccurs);
+		NodeBuilder all = parent.addChild("all").addAttribute("minOccurs", minOccurs).addAttribute("maxOccurs", maxOccurs);
 		all.addChildren(elements, (e,n) -> e.render(n));
 		return all;
 	}
@@ -25,7 +26,25 @@ public class XmlAllImpl extends BaseXmlNode<XmlAll> implements XmlAll {
 	@Override
 	public XmlAll loadFromNode(NodeBuilder node) {
 		minOccurs = node.getAttribute("minOccurs");
-		node.search(n -> "element".equals(n.getName())).forEach(n -> addElement(n.getAttribute("name")).loadFromNode(n));
+		maxOccurs = node.getAttribute("maxOccurs");
+		for (NodeBuilder child : node.getChildren()) {
+			if ("element".equals(child.getName())) {
+				addElement(child.getAttribute("name")).loadFromNode(child);
+			}
+			else if ("any".equals(child.getName())) {
+				addAny().loadFromNode(child);
+			}
+			else if ("group".equals(child.getName())) {
+				addGroup().loadFromNode(child);
+			}
+			else if ("choice".equals(child.getName())) {
+				addChoice().loadFromNode(child);
+			}
+			else if ("annotation".equals(child.getName()) || child.isTextNode()) {
+				// annotation are ignored
+			}
+			else throw new RuntimeException("not support node name: " + child);
+		}
 		return this;
 	}
 
@@ -35,6 +54,27 @@ public class XmlAllImpl extends BaseXmlNode<XmlAll> implements XmlAll {
 		elements.add(e);
 		return e;
 	}
+	@Override
+	public XmlAny addAny() {
+		XmlAny e = new XmlAnyImpl(this);
+		elements.add(e);
+		return e;
+	}
+
+	@Override
+	public XmlChoice addChoice() {
+		XmlChoice e = new XmlChoiceImpl(this);
+		elements.add(e);
+		return e;
+	}
+
+	@Override
+	public XmlGroup addGroup() {
+		XmlGroup e = new XmlGroupImpl(this);
+		elements.add(e);
+		return e;
+	}
+
 
 	@Override
 	public List<XmlNode<?>> getChildren() {
@@ -49,11 +89,20 @@ public class XmlAllImpl extends BaseXmlNode<XmlAll> implements XmlAll {
 		this.minOccurs = minOccurs;
 		return this;
 	}
+	@Override
+	public String getMaxOccurs() {
+		return maxOccurs;
+	}
+	@Override
+	public XmlAll setMaxOccurs(String maxOccurs) {
+		this.maxOccurs = maxOccurs;
+		return this;
+	}
 
 	@Override
 	public void duplicateInSchema(XmlAll targetElement, Set<String> changeToTargetNamespace) {
 		targetElement.setMinOccurs(getMinOccurs());
+		targetElement.setMaxOccurs(getMaxOccurs());
 		elements.forEach(e -> e.asElement().duplicateInSchema(targetElement.addElement(e.asElement().getName()), changeToTargetNamespace));
 	}
-
 }

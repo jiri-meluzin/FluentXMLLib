@@ -106,7 +106,8 @@ public class XmlSchemaBuilder extends BaseXmlNode<XmlSchema> implements XmlSchem
 	}
 	private void renderSchema(NodeBuilder schemaElement) {
 		schemaElement.
-			addNamespace("http://www.w3.org/2001/XMLSchema").
+			//addNamespace("http://www.w3.org/2001/XMLSchema").
+			setPrefix("xsd").
 			addNamespace("xsd","http://www.w3.org/2001/XMLSchema");
 		if (isAttributeFormQualified() == Boolean.TRUE) schemaElement.addAttribute("attributeFormDefault", "qualified");
 		if (isAttributeFormQualified() == Boolean.FALSE) schemaElement.addAttribute("attributeFormDefault", "unqualified");

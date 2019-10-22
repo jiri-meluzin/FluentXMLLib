@@ -190,4 +190,20 @@ public class XmlComplexTypeImpl extends XmlTypeImpl<XmlComplexType> implements X
 		this.isBaseTypeSimple = isSimple;
 		return this;
 	}
+	@Override
+	public String getMinOccurs() {
+		throw new UnsupportedOperationException("XmlComplextType does not support minOccurs");
+	}
+	@Override
+	public XmlComplexType setMinOccurs(String minOccurs) {
+		throw new UnsupportedOperationException("XmlComplextType does not support minOccurs");
+	}
+	@Override
+	public String getMaxOccurs() {
+		throw new UnsupportedOperationException("XmlComplextType does not support maxOccurs");
+	}
+	@Override
+	public XmlComplexType setMaxOccurs(String name) {
+		throw new UnsupportedOperationException("XmlComplextType does not support maxOccurs");
+	}
 }

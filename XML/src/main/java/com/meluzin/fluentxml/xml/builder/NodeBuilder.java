@@ -62,6 +62,9 @@ public interface NodeBuilder {
 	 */
 	public NodeBuilder addChild(String name, boolean parentPrefix);
 	public NodeBuilder addChild(AddChildAction action);
+	public default NodeBuilder addChild(AddChildActionReturn action) {
+		return action.exec(this);
+	}
 	public <T> NodeBuilder addChild(T item, AddChildFunctor<T> functor);
 	public NodeBuilder removeChild(int index);
 	public NodeBuilder removeChild(NodeBuilder child);
@@ -157,6 +160,10 @@ public interface NodeBuilder {
 	}
 	public interface AddChildAction {
 		public void exec(NodeBuilder parent);
+	}
+
+	public interface AddChildActionReturn {
+		public NodeBuilder exec(NodeBuilder parent);
 	}
 	public interface NodePredicate extends Predicate<NodeBuilder> {}
 	
