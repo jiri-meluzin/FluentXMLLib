@@ -301,6 +301,15 @@ public class NodeBuilderImpl implements NodeBuilder {
 		return this;
 	}
 	@Override
+	public <TChild, C> NodeBuilder addChildren(Stream<TChild> elements, C defaultContext, AddChildFunctorWithContext<TChild,C> functor) {
+		Context<C> ctx = new Context<C>(defaultContext);
+		elements.forEach(e -> {
+			C c = functor.exec(e, this, ctx.getValue());
+			ctx.setValue(c);
+		});
+		return this;
+	}
+	@Override
 	public NodeBuilder addTextChild(String text) {
 		NodeBuilder child = createTextElement(text);
 		children.add(child);		

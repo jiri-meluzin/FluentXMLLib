@@ -71,6 +71,7 @@ public interface NodeBuilder {
 	public NodeBuilder removeChildren(Predicate<NodeBuilder> criterium);
 	public <T> NodeBuilder addChildren(Iterable<T> elements, AddChildFunctor<T> functor);
 	public <T, C> NodeBuilder addChildren(Iterable<T> elements, C defaultContext, AddChildFunctorWithContext<T,C> functor);
+	public <T, C> NodeBuilder addChildren(Stream<T> elements, C defaultContext, AddChildFunctorWithContext<T,C> functor);
 	public <T> NodeBuilder addChildren(Stream<T> elementsStream, AddChildFunctor<T> functor);
 	/**
 	 * 
