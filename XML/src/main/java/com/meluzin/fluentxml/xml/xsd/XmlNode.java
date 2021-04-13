@@ -220,7 +220,7 @@ public interface XmlNode<T extends BaseBuilder<T>> extends BaseBuilder<T> {
 		public XmlSchema addNamespace(String prefix, String namespace);
 		public XmlSchema importNamespace(String namespace);
 		public XmlSchema importNamespace(String namespace, String xsd);
-		public Map<String, String> getImports();
+		public List<SchemaImport> getImports();
 		public Map<String, String> getNamespaces();
 		public XmlSimpleType addSimpleType(String name);
 		public List<String> getIncludes();	
@@ -230,6 +230,10 @@ public interface XmlNode<T extends BaseBuilder<T>> extends BaseBuilder<T> {
 		public XmlSchema setElementFormQualified(Boolean qualified);
 		public XmlSchema setAttributeFormQualified(Boolean qualified);
 		public Optional<SchemaReference> getSchemaReference();
+	}
+	public interface SchemaImport {
+		public String getNamespace();
+		public Optional<String> getLocation();
 	}
 	public interface WsdlOperation {
 		public WsdlOperation setTargetNamespace(String targetNamespace);

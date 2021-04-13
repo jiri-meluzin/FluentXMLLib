@@ -1,5 +1,6 @@
 package com.meluzin.fluentxml.xml.xsd;
 
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,7 +26,7 @@ import com.meluzin.fluentxml.xml.xsd.impl.XmlSimpleTypeImpl;
 public class XmlSchemaBuilder extends BaseXmlNode<XmlSchema> implements XmlSchema {
 	private List<XmlNode<?>> elements = new ArrayList<XmlNode<?>>();
 	private Map<String, String> namespaces = new HashMap<String, String>();
-	private Map<String, String> importNamespaces = new HashMap<String, String>();
+	private List<SchemaImport> importNamespaces = new ArrayList<>();
 	private List<String> includes = new ArrayList<>();
 	private Boolean elementFormQualified = true;
 	private Boolean attributeFormQualified;
@@ -50,8 +51,8 @@ public class XmlSchemaBuilder extends BaseXmlNode<XmlSchema> implements XmlSchem
 		for (String schemaLocation: includes) {
 			root.addChild("include").addAttribute("schemaLocation", schemaLocation);
 		}
-		for (String importNS: importNamespaces.keySet()) {
-			root.addChild("import").addAttribute("namespace", importNS).addAttribute("schemaLocation", importNamespaces.get(importNS));
+		for (SchemaImport importNS: importNamespaces) {
+			root.addChild("import").addAttribute("namespace", importNS.getNamespace()).addAttribute("schemaLocation", importNS.getLocation().orElse(null));
 		}
 		root.
 			addNamespace("tns", targetNamespace).
@@ -190,7 +191,17 @@ public class XmlSchemaBuilder extends BaseXmlNode<XmlSchema> implements XmlSchem
 	}
 	@Override
 	public XmlSchema importNamespace(String namespace, String xsd) {
-		this.importNamespaces.put(namespace, xsd);
+		this.importNamespaces.add(new SchemaImport() {			
+			@Override
+			public String getNamespace() {
+				return namespace;
+			}
+			
+			@Override
+			public Optional<String> getLocation() {
+				return Optional.ofNullable(xsd);
+			}
+		});
 		return this;
 	}
 	@Override
@@ -198,7 +209,7 @@ public class XmlSchemaBuilder extends BaseXmlNode<XmlSchema> implements XmlSchem
 		return namespaces;
 	}
 	@Override
-	public Map<String, String> getImports() {
+	public List<SchemaImport> getImports() {
 		return importNamespaces;
 	}
 

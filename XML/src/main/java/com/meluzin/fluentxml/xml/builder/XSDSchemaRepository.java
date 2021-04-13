@@ -67,13 +67,15 @@ public class XSDSchemaRepository extends BaseSchemaRepository<XmlSchema> {
 		return findType(ref.getLocalName(), ref.getNamespace());
 	}
 	public XmlType<?> findType(String typeName, String typeNamespace) {		
-		XmlType<?> type = getSchemas().stream().filter(s ->  s.getTargetNamespace() != null && s.getTargetNamespace().equals(typeNamespace)).
+		XmlType<?> type = getSchemas().stream().filter(s ->  (s.getTargetNamespace() != null && s.getTargetNamespace().equals(typeNamespace)) || typeNamespace==s.getTargetNamespace()).
 				flatMap(s -> s.getElements().stream()).
 				filter(e -> e instanceof XmlType && typeName.equals(((XmlType<?>)e).getName())).
 				map(t -> (XmlType<?>)t).
 				findFirst().orElse(null)
 			;
-		if (type == null) throw new NoSuchElementException("Unknown type: {" + typeNamespace +  "}:"+ typeName);
+		if (type == null) {
+			throw new NoSuchElementException("Unknown type: {" + typeNamespace +  "}:"+ typeName);
+		}
 		return type;
 	}
 	public XmlType<?> findType(String typeName) {		

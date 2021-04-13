@@ -42,11 +42,17 @@ public class Log {
 		 //Log.addHandler(new SystemOutHandler());
 		 Log.get().severe("started");
 		 Log.get().severe("finished");
+		 Log.get().info("finished");
 	}
 	private static List<Handler> handlers = new ArrayList<>();
 	static {
 		//Logger.getGlobal().setLevel(Level.FINEST);
 		//Logger.getGlobal().addHandler(new SystemOutHandler());
+		if (System.getProperty("java.util.logging.config.file") == null) {
+		      String path = Log.class.getResource("logging.properties")
+                    .getFile();
+			System.setProperty("java.util.logging.config.file", path);
+		}
 		handlers.add(new SystemOutHandler());
 	}
 	public static void addHandler(Handler handler) {

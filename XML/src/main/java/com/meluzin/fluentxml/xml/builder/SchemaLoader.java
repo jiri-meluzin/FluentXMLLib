@@ -15,6 +15,7 @@ import java.util.stream.Stream;
 
 import com.meluzin.fluentxml.wsdl.impl.WsdlImpl;
 import com.meluzin.fluentxml.xml.builder.BaseSchema.SchemaType;
+import com.meluzin.fluentxml.xml.xsd.XmlNode.SchemaImport;
 import com.meluzin.fluentxml.xml.xsd.XmlNode.XmlSchema;
 import com.meluzin.fluentxml.xml.xsd.XmlSchemaBuilder;
 
@@ -53,7 +54,7 @@ public class SchemaLoader {
 				xmlSchema.merge(cache.get(ref), new HashSet<String>());
 			}
 			cache.put(ref, xmlSchema);
-			references = Stream.concat(references, xmlSchema.getImports().keySet().stream().map(extractImportedReferencesFromXSD(source, xmlSchema)));
+			references = Stream.concat(references, xmlSchema.getImports().stream().map(extractImportedReferencesFromXSD(source, xmlSchema)));
 			references = Stream.concat(references, xmlSchema.getIncludes().stream().map(extractIncludeReferencesFromXSD(source, xmlSchema)));
 		} else {
 			System.err.println("Unsupported path: " + source);
@@ -80,8 +81,8 @@ public class SchemaLoader {
 	}
 
 
-	public Function<? super String, ? extends SchemaReference> extractImportedReferencesFromXSD(Path source, XmlSchema xmlSchema) {
-		return targetNamespace -> new SchemaReference(targetNamespace, Paths.get(xmlSchema.getImports().get(targetNamespace)), source, null, xmlSchema.getSchemaType());
+	public Function<? super SchemaImport, ? extends SchemaReference> extractImportedReferencesFromXSD(Path source, XmlSchema xmlSchema) {
+		return schemaImport -> new SchemaReference(schemaImport.getNamespace(), Paths.get(schemaImport.getLocation().get()), source, null, xmlSchema.getSchemaType());
 	}
 	public Function<? super String, ? extends SchemaReference> extractIncludeReferencesFromXSD(Path source, XmlSchema xmlSchema) {
 		return relativePath -> new SchemaReference(xmlSchema.getTargetNamespace(), Paths.get(relativePath), source, null, xmlSchema.getSchemaType());
@@ -108,7 +109,7 @@ public class SchemaLoader {
 	private Stream<SchemaReference> loadXSDReferences(Path source, NodeBuilder sourceXml) {
 		return sourceXml.
 				search(true, c -> ("import".equals(c.getName()) || "include".equals(c.getName())) && xsdNamespace.equals(c.getNamespace())).
-				map(n -> new SchemaReference(n.getAttribute("namespace"), n.getAttribute("schemaLocation") == null ? source : Paths.get(n.getAttribute("schemaLocation")), source, n, SchemaType.XSD));
+				map(n -> new SchemaReference(n.getAttribute("namespace"), n.getAttribute("schemaLocation") == null ? source : Paths.get(n.getAttribute("schemaLocation").trim()), source, n, SchemaType.XSD));
 	}
 
 	private Stream<SchemaReference> loadWSDLReferences(Path source, NodeBuilder sourceXml) {
