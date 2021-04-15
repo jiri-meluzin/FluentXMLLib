@@ -3,6 +3,7 @@ package com.meluzin.fluentxml.xml.wsdl.impl;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import com.meluzin.fluentxml.xml.builder.NodeBuilder.AddChildFunctor;
 import com.meluzin.fluentxml.xml.xsd.XmlNode.Wsdl;
@@ -25,6 +26,7 @@ public class WsdlOperationImpl implements WsdlOperation {
 	private boolean deprecated = false;
 	private AddChildFunctor<WsdlOperation> documentationRenderer = (n, o) -> {};
 	private AddChildFunctor<WsdlOperation> bindingRenderer = (o, n) -> n.addChild("soap", "operation").addAttribute("soapAction", o.getSoapAction());
+	private Optional<String> documentation = Optional.empty();
 	public WsdlOperationImpl(Wsdl wsdl, String name) {
 		this.wsdl = wsdl;
 		this.name = name;
@@ -161,5 +163,14 @@ public class WsdlOperationImpl implements WsdlOperation {
 	public WsdlOperation setSoapStyle(String soapStyle) {
 		this.soapStyle = soapStyle;
 		return this;
+	}
+	@Override
+	public WsdlOperation setDocumentation(Optional<String> documentation) {
+		this.documentation = documentation;
+		return this;
+	}
+	@Override
+	public Optional<String> getDocumentation() {
+		return documentation;
 	}
 }

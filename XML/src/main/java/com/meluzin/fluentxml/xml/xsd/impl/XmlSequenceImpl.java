@@ -2,7 +2,9 @@ package com.meluzin.fluentxml.xml.xsd.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.meluzin.fluentxml.xml.builder.NodeBuilder;
 import com.meluzin.fluentxml.xml.xsd.XmlNode;
@@ -64,7 +66,9 @@ public class XmlSequenceImpl extends BaseXmlNode<XmlSequence> implements XmlSequ
 				addAny().loadFromNode(child);
 			}
 			else if (child.isTextNode()) {}
-			else if ("annotation".equals(child.getName())) {}
+			else if ("annotation".equals(child.getName())) {
+				setDocumentation(child.search("documentation").map(nn -> nn.getTextContent()).filter(n -> n != null).findFirst());
+			}
 			else throw new RuntimeException("not support node name: " + node);
 		}
 		return this;

@@ -1,5 +1,8 @@
 package com.meluzin.fluentxml.xml.xsd.impl;
 
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import com.meluzin.fluentxml.xml.builder.NodeBuilder;
 import com.meluzin.fluentxml.xml.xsd.XmlNode;
 import com.meluzin.fluentxml.xml.xsd.XmlNode.XmlAny;
@@ -28,6 +31,8 @@ public class XmlAnyImpl extends BaseXmlNode<XmlAny> implements XmlAny {
 		setMinOccurs(node.getAttribute("minOccurs"));
 		setMaxOccurs(node.getAttribute("maxOccurs"));
 		setProcessContents(node.getAttribute("processContents"));
+		setDocumentation(node.search(true, "documentation").map(n -> n.getTextContent()).filter(n -> n != null).findFirst());
+		
 		return this;
 	}
 

@@ -2,7 +2,9 @@ package com.meluzin.fluentxml.xml.xsd.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.meluzin.fluentxml.xml.builder.NodeBuilder;
 import com.meluzin.fluentxml.xml.xsd.XmlNode;
@@ -95,6 +97,9 @@ public class XmlSimpleTypeImpl extends XmlTypeImpl<XmlSimpleType> implements
 				search(t -> "pattern".equals(t.getName())).
 				forEach(n -> setPattern(n.getAttribute("value")));
 		}
+
+
+		setDocumentation(node.search("annotation").map(n -> n.search("documentation")).flatMap(n -> n).map(n -> n.getTextContent()).filter(n -> n != null).findFirst());
 		return this;
 	}
 

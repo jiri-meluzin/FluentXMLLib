@@ -2,6 +2,7 @@ package com.meluzin.fluentxml.xml.xsd.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -138,7 +139,10 @@ public class XmlComplexTypeImpl extends XmlTypeImpl<XmlComplexType> implements X
 					addAll().loadFromNode(child);
 				}			
 				else if (child.isTextNode()) {}
-				else if ("annotation".equals(child.getName())) {}
+
+				else if ("annotation".equals(child.getName())) {
+					setDocumentation(child.search("documentation").map(n -> n.getTextContent()).filter(n -> n != null).findFirst());
+				}
 				else throw new RuntimeException("not support node name: " + node);
 			}
 		}

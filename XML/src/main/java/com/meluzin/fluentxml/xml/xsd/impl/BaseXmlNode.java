@@ -1,5 +1,7 @@
 package com.meluzin.fluentxml.xml.xsd.impl;
 
+import java.util.Optional;
+
 import com.meluzin.fluentxml.xml.builder.NodeBuilder;
 import com.meluzin.fluentxml.xml.builder.ReferenceInfoImpl;
 import com.meluzin.fluentxml.xml.xsd.XmlNode;
@@ -11,6 +13,7 @@ public abstract class BaseXmlNode<T extends BaseBuilder<T>> implements BaseBuild
 	@SuppressWarnings("unchecked")
 	private BaseBuilderImpl<T> baseBuilderImpl = new BaseBuilderImpl<T>((T)this);
 	private XmlNode<?> parent;
+	private Optional<String> documentation = Optional.empty();
 	public BaseXmlNode(XmlNode<?> parent) {
 		this.parent = parent;
 	}
@@ -68,5 +71,15 @@ public abstract class BaseXmlNode<T extends BaseBuilder<T>> implements BaseBuild
 	@Override
 	public ReferenceInfo parseQualifiedName(final String qualifiedName, NodeBuilder context) {		
 		return new ReferenceInfoImpl(qualifiedName, context);
+	}
+	@Override
+	public Optional<String> getDocumentation() {
+		return documentation;
+	}
+	@SuppressWarnings("unchecked")
+	@Override
+	public T setDocumentation(Optional<String> documentation) {
+		this.documentation = documentation;
+		return (T)this;
 	}
 }

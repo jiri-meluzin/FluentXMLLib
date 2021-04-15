@@ -556,10 +556,10 @@ public class NodeBuilderImpl implements NodeBuilder {
 				return getAttributesDiff(other);
 			if (textNode != other.textNode)
 				return Optional.of(getXPath() + " - Other has here textnode");
-			if (content == null) {
-				if (other.content != null)
+			if (content == null || content.trim().isEmpty()) {
+				if (other.content != null && !content.trim().isEmpty())
 					return Optional.of(getXPath() + " - Other has here textcontent: " + other.content);
-			} else if (!content.trim().equals(other.content == null ? null : other.content.trim()))
+			} else if (!content.trim().equals(other.content == null ? "" : other.content.trim()))
 				return Optional.of(getXPath() + " - Other has here different textcontent: " + content + " != " + other.content);
 			if (children == null) {
 				if (other.children != null)
@@ -640,10 +640,10 @@ public class NodeBuilderImpl implements NodeBuilder {
 				return false;
 		} else if (!isChildrenListEqual(other))
 			return false;
-		if (content == null) {
-			if (other.content != null)
+		if (content == null || content.trim().isEmpty()) {
+			if (other.content != null && !content.trim().isEmpty())
 				return false;
-		} else if (!content.trim().equals(other.content == null ? null : other.content.trim()))
+		} else if (!content.trim().equals(other.content == null ? "" : other.content.trim()))
 			return false;
 		if (name == null) {
 			if (other.name != null)

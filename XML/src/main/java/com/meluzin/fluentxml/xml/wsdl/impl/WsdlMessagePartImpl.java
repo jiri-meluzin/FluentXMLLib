@@ -1,5 +1,7 @@
 package com.meluzin.fluentxml.xml.wsdl.impl;
 
+import java.util.Optional;
+
 import com.meluzin.fluentxml.xml.builder.NodeBuilder;
 import com.meluzin.fluentxml.xml.xsd.XmlNode;
 import com.meluzin.fluentxml.xml.xsd.XmlNode.WsdlMessagePart;
@@ -7,6 +9,7 @@ import com.meluzin.functional.BuilderAction;
 
 public class WsdlMessagePartImpl implements WsdlMessagePart {
 	private String name;
+	private Optional<String> documentation = Optional.empty();
 	private String type;
 	private String typeNamespace;
 	private boolean isPartElementRef = true;
@@ -132,6 +135,15 @@ public class WsdlMessagePartImpl implements WsdlMessagePart {
 	@Override
 	public com.meluzin.fluentxml.xml.xsd.XmlNode.WsdlMessagePart setTypeNamespace(String typeNamespace) {
 		this.typeNamespace = typeNamespace;
+		return this;
+	}
+	@Override
+	public Optional<String> getDocumentation() {
+		return documentation;
+	}
+	@Override
+	public WsdlMessagePart setDocumentation(Optional<String> documentation) {
+		this.documentation = documentation;
 		return this;
 	}
 

@@ -1,5 +1,8 @@
 package com.meluzin.fluentxml.xml.xsd.impl;
 
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import com.meluzin.fluentxml.xml.builder.NodeBuilder;
 import com.meluzin.fluentxml.xml.xsd.XmlNode;
 import com.meluzin.fluentxml.xml.xsd.XmlNode.XmlGroup;
@@ -34,7 +37,10 @@ public class XmlGroupImpl extends BaseXmlNode<XmlGroup> implements XmlGroup {
 		node.getChildren().forEach(n -> {
 			if ("sequence".equals(n.getName())) addSequence().loadFromNode(n);
 			else if ("all".equals(n.getName())) addAll().loadFromNode(n);
-			else if ("element".equals(n.getName())) addElement(n.getAttribute("name")).loadFromNode(n);			
+			else if ("element".equals(n.getName())) addElement(n.getAttribute("name")).loadFromNode(n);
+			else if ("annotation".equals(n.getName())) {
+				setDocumentation(n.search("documentation").map(nn -> nn.getTextContent()).filter(nn -> nn != null).findFirst());
+			}
 		});
 		
 		return null;

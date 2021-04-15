@@ -233,7 +233,9 @@ public class WsdlImpl  implements Wsdl {
 					WsdlMessage msg = getMessages().stream().filter(m -> messageName.equals(m.getName())).findFirst().orElse(null);
 					op.addFault(f.getAttribute("name"), msg);
 				});
+				
 				op.setDeprecated(defOp.hasChild(true, c -> "deprecated".equals(c.getName())));
+				op.setDocumentation(defOp.search("annotation").map(a -> a.search("documentation").map(d -> d.getTextContent()).filter(d -> d != null)).flatMap(a -> a).findFirst());
 				if (input != null) {
 					op.setInputMessage(new ReferenceInfoImpl(input.getAttribute("message"), input).getLocalName());
 				}

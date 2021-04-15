@@ -14,6 +14,7 @@ public class PartImpl implements Part {
 	private String name;
 	private Optional<ReferenceInfo> element = Optional.empty();
 	private Optional<ReferenceInfo> type = Optional.empty();
+	private Optional<String> documentation = Optional.empty();
 	
 	PartImpl(NodeBuilder partXml) {
 		if (com.meluzin.fluentxml.wsdl.Wsdl.WSDL_NAMESPACE.equals(partXml.getNamespace()) && PART.equals(partXml.getName())) {
@@ -24,12 +25,21 @@ public class PartImpl implements Part {
 			if (partXml.hasAttribute("type")) {
 				type = Optional.of(new ReferenceInfoImpl(partXml.getAttribute("type"), partXml));
 			}
+			this.documentation = partXml.search("annotation").map(a -> a.search("documentation").map(d -> d.getTextContent()).filter(n -> n != null)).flatMap(a -> a).findFirst();
 		}
 		else {
 			throw new IllegalArgumentException("Xml elements must be {"+com.meluzin.fluentxml.wsdl.Wsdl.WSDL_NAMESPACE+"}"+PART + ", but it was {" + partXml.getNamespace() + "}" + partXml.getName());
 		}
 	}
-	
+	@Override
+	public Optional<String> getDocumentation() {
+		return documentation;
+	}
+	@Override
+	public Part setDocumentation(Optional<String> documentation) {
+		this.documentation = documentation;
+		return this;
+	}
 	@Override
 	public String getName() { 
 		return name;

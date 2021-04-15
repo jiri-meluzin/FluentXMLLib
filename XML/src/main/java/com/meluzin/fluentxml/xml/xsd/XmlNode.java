@@ -29,6 +29,8 @@ public interface XmlNode<T extends BaseBuilder<T>> extends BaseBuilder<T> {
 	public XmlExceptionType asException();
 	public NodeBuilder render(NodeBuilder parent);
 	public XmlNode<?> getRoot();
+	public Optional<String> getDocumentation();
+	public T setDocumentation(Optional<String> documentation);
 	public T loadFromNode(NodeBuilder node);
 	public String getQualifiedName(String namespace, String localName, NodeBuilder context);
 	public ReferenceInfo parseQualifiedName(String qualifiedName, NodeBuilder context);
@@ -265,6 +267,8 @@ public interface XmlNode<T extends BaseBuilder<T>> extends BaseBuilder<T> {
 		public WsdlOperation setBindingRenderer(AddChildFunctor<WsdlOperation> binding);
 		public boolean isDeprecated();
 		public WsdlOperation setDeprecated(boolean deprecated);
+		public Optional<String> getDocumentation();
+		public WsdlOperation setDocumentation(Optional<String> documentation);
 	}
 	public interface WsdlMessagePart extends XmlNode<WsdlMessagePart> {
 		public String getName();

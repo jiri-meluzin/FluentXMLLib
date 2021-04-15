@@ -2,6 +2,7 @@ package com.meluzin.fluentxml.xml.wsdl.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import com.meluzin.fluentxml.xml.builder.NodeBuilder;
 import com.meluzin.fluentxml.xml.xsd.XmlNode;
@@ -10,6 +11,7 @@ import com.meluzin.functional.BuilderAction;
 
 public class WsdlMessageImpl implements WsdlMessage {
 	private String name;
+	private Optional<String> documentation = Optional.empty();
 	private Wsdl wsdl;
 	private List<WsdlMessagePart> parts = new ArrayList<>();
 	public WsdlMessageImpl(Wsdl wsdl) {
@@ -37,6 +39,15 @@ public class WsdlMessageImpl implements WsdlMessage {
 	@Override
 	public String getName() {
 		return name;
+	}
+	@Override
+	public Optional<String> getDocumentation() {
+		return documentation;
+	}
+	@Override
+	public WsdlMessage setDocumentation(Optional<String> documentation) {
+		this.documentation = documentation;
+		return this;
 	}
 
 	@Override

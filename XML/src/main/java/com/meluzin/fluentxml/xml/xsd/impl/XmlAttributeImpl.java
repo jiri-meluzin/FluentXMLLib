@@ -1,6 +1,8 @@
 package com.meluzin.fluentxml.xml.xsd.impl;
 
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.meluzin.fluentxml.xml.builder.NodeBuilder;
 import com.meluzin.fluentxml.xml.xsd.XmlNode;
@@ -115,6 +117,8 @@ public class XmlAttributeImpl extends BaseXmlNode<XmlAttribute> implements XmlAt
 		if (simple != null) {
 			addSimpleType().loadFromNode(simple);
 		}
+
+		setDocumentation(node.search(true, "documentation").map(n -> n.getTextContent()).filter(n -> n != null).findFirst());
 		return this;
 	}
 	

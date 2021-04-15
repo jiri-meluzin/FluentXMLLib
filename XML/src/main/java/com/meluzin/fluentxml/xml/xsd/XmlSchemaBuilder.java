@@ -307,6 +307,9 @@ public class XmlSchemaBuilder extends BaseXmlNode<XmlSchema> implements XmlSchem
 			else if ("annotation".equals(el.getName()) || el.isTextNode()) {
 				// ignore annotations
 			}
+			else if ("include".equals(el.getName())) {
+				// ignore includes
+			}
 			else {
 				System.err.println("Warning, unknown element in schema: " + el.getName());
 			}

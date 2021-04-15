@@ -82,6 +82,9 @@ public class XmlBuilderFactory {
 		}
 	}
 	public void renderDocument(Document document, StreamResult result, boolean prettyPrint) {
+		renderDocument(document, result, prettyPrint, false);
+	}
+	public void renderDocument(Document document, StreamResult result, boolean prettyPrint, boolean omitXmlDeclaration) {
 		TransformerFactory tf = TransformerFactory.newInstance();
 		Transformer transformer;
 		try {
@@ -90,6 +93,9 @@ public class XmlBuilderFactory {
 				transformer.setOutputProperty(OutputKeys.DOCTYPE_PUBLIC, "");
 				transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 				transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+			}
+			if (omitXmlDeclaration) {
+				transformer.setOutputProperty("omit-xml-declaration", "yes");
 			}
 			document.setXmlStandalone(true);
 			DOMSource xmlSource = new DOMSource(document);
@@ -105,8 +111,8 @@ public class XmlBuilderFactory {
 		renderDocument(document, new StreamResult(writer), prettyPrint);
 		return writer.getBuffer().toString();
 	}*/
-	public void renderNode(NodeBuilder node, boolean prettyPrint, OutputStream output) {
-		renderDocument(createDocument(node), new StreamResult(output), prettyPrint);
+	public void renderNode(NodeBuilder node, boolean prettyPrint, OutputStream output, boolean omitXmlDeclaration) {
+		renderDocument(createDocument(node), new StreamResult(output), prettyPrint, omitXmlDeclaration);
 	}
 	public void renderNode(NodeBuilder node, Path file) {
 		File f = file.toAbsolutePath().toFile();
@@ -132,13 +138,16 @@ public class XmlBuilderFactory {
 			} catch (IOException e) {
 				throw new RuntimeException("Cannot print text node", e);
 			}
-		else renderNode(node, true, output);
+		else renderNode(node, true, output, false);
 	}
 	public String renderNode(NodeBuilder node, boolean prettyPrint) {
+		return renderNode(node, prettyPrint, false);
+	}
+	public String renderNode(NodeBuilder node, boolean prettyPrint, boolean omitXmlDeclaration) {
 		if (node.isTextNode()) return node.getTextContent();
 		else {
 			ByteArrayOutputStream writer = new ByteArrayOutputStream();
-			renderNode(node, prettyPrint, writer);			
+			renderNode(node, prettyPrint, writer, omitXmlDeclaration);			
 			return writer.toString();
 		}
 	}
@@ -306,5 +315,8 @@ public class XmlBuilderFactory {
 			return true;
 		}).toArray();
 		Log.get().info(x.toString());
+	}
+	public void renderNode(NodeBuilder node, boolean prettyPrint, OutputStream output) {
+		renderNode(node, prettyPrint, output, false);
 	}
 }

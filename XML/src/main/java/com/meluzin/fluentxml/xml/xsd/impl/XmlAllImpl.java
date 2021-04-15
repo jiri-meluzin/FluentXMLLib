@@ -2,7 +2,9 @@ package com.meluzin.fluentxml.xml.xsd.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.meluzin.fluentxml.xml.builder.NodeBuilder;
 import com.meluzin.fluentxml.xml.xsd.XmlNode;
@@ -40,8 +42,10 @@ public class XmlAllImpl extends BaseXmlNode<XmlAll> implements XmlAll {
 			else if ("choice".equals(child.getName())) {
 				addChoice().loadFromNode(child);
 			}
-			else if ("annotation".equals(child.getName()) || child.isTextNode()) {
-				// annotation are ignored
+			else if ("annotation".equals(child.getName())) {
+				setDocumentation(child.search("documentation").map(n -> n.getTextContent()).filter(n -> n != null).findFirst());
+			}
+			else if (child.isTextNode()) {	// annotation are ignored
 			}
 			else throw new RuntimeException("not support node name: " + child);
 		}
