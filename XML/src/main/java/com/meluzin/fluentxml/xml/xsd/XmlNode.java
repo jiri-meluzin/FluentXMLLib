@@ -58,6 +58,19 @@ public interface XmlNode<T extends BaseBuilder<T>> extends BaseBuilder<T> {
 		public XmlAll addAll();
 		public XmlNode<?> getChild();
 	}
+	public interface XmlAttributeGroupChild<A extends XmlNode<A>> extends XmlNode<A> {}
+	public interface XmlAttributeGroup extends XmlAttributeGroupChild<XmlAttributeGroup> {
+		public String getName();
+		public XmlAttributeGroup setName(String name);
+		public String getRef();
+		public XmlAttributeGroup setRef(String ref);
+		public String getRefNamespace();
+		public XmlAttributeGroup setRefNamespace(String refNamespace);
+		public List<XmlNode<?>> getChildren();
+		public XmlAttribute addAttribute();
+		public XmlAttributeGroup addAttributeGroup();
+		public void duplicateInSchema(XmlAttributeGroup targetElement, Set<String> changeToTargetNamespace);
+	}
 	public interface XmlElement extends XmlNode<XmlElement> {
 		public String getName();
 		public XmlElement setName(String name);
@@ -91,7 +104,7 @@ public interface XmlNode<T extends BaseBuilder<T>> extends BaseBuilder<T> {
 		public String getProcessContents();
 		public XmlAny setProcessContents(String processContents);		
 	}
-	public interface XmlAttribute extends XmlNode<XmlAttribute> {
+	public interface XmlAttribute extends XmlAttributeGroupChild<XmlAttribute> {
 		public String getName();
 		public XmlAttribute setName(String name);
 		public String getRef();
@@ -133,6 +146,7 @@ public interface XmlNode<T extends BaseBuilder<T>> extends BaseBuilder<T> {
 		public XmlComplexType setContentType(String contentType);
 		//public List<XmlAttribute> getAttributes();
 		public void duplicateInSchema(XmlComplexType targetElement, Set<String> changeToTargetNamespace);
+		public XmlAttributeGroup addAttributeGroup();
 	}
 	public interface XmlSimpleType extends XmlType<XmlSimpleType> {
 		public List<String> getEnumeration();
@@ -209,6 +223,7 @@ public interface XmlNode<T extends BaseBuilder<T>> extends BaseBuilder<T> {
 	public interface XmlSchema extends BaseSchema, XmlNode<XmlSchema> {
 		public XmlComplexType addType(String name);
 		public XmlAttribute addAttribute(String name);
+		public XmlAttributeGroup addAttributeGroup();
 		public XmlElement addElement(String name);
 		public XmlGroup addGroup();
 		public XmlExceptionType addException(String name);

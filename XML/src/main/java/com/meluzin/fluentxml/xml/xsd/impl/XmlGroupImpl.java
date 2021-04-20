@@ -43,7 +43,7 @@ public class XmlGroupImpl extends BaseXmlNode<XmlGroup> implements XmlGroup {
 			}
 		});
 		
-		return null;
+		return this;
 	}
 
 	@Override
@@ -113,8 +113,8 @@ public class XmlGroupImpl extends BaseXmlNode<XmlGroup> implements XmlGroup {
 
 	@Override
 	public XmlAll addAll() {
-		// TODO Auto-generated method stub
-		return null;
+		this.child = new XmlAllImpl(this);				
+		return (XmlAll)child;
 	}
 
 	@Override

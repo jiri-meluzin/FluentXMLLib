@@ -41,9 +41,9 @@ public class TestNodeBuilderImpl {
 	@Test 
 	public void testProcessingInstruction() {
 		String renderNode = new XmlBuilderFactory().renderNode(new XmlBuilderFactory().createRootElement("x").addProcessingInstruction("a", "b"), false);
-		assertEquals(renderNode, "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><?a b?><x/>");
+		assertEquals(renderNode, "<?xml version=\"1.0\" encoding=\"UTF-8\"?><?a b?><x/>");
 		String renderNode2 = new XmlBuilderFactory().renderNode(new XmlBuilderFactory().createRootElement("x").addProcessingInstruction("xml-stylesheet", "type=\"text/xsl\" href=\"build-log.xsl\""), false);
-		assertEquals(renderNode2, "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><?xml-stylesheet type=\"text/xsl\" href=\"build-log.xsl\"?><x/>");
+		assertEquals(renderNode2, "<?xml version=\"1.0\" encoding=\"UTF-8\"?><?xml-stylesheet type=\"text/xsl\" href=\"build-log.xsl\"?><x/>");
 	}
 	@Test
 	public void test3PrintHelloWorld() {

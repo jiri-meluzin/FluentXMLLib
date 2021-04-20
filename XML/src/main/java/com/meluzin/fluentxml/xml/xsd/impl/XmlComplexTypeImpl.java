@@ -1,6 +1,7 @@
 package com.meluzin.fluentxml.xml.xsd.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -27,6 +28,9 @@ public class XmlComplexTypeImpl extends XmlTypeImpl<XmlComplexType> implements X
 	//@Override
 	public List<XmlAttribute> getAttributes() {
 		return elements.stream().filter(e -> e instanceof XmlAttribute).map(e -> e.asAttribute()).collect(Collectors.toList());
+	}
+	public List<XmlAttributeGroup> getAttributeGroups() {
+		return elements.stream().filter(e -> e instanceof XmlAttributeGroup).map(e -> (XmlAttributeGroup)e).collect(Collectors.toList());
 	}
 	public XmlElement addElement(String name) {
 		XmlElement el = new XmlElementImpl(this).setName(name);
@@ -95,9 +99,10 @@ public class XmlComplexTypeImpl extends XmlTypeImpl<XmlComplexType> implements X
 			}
 			else el.render(childElements);
 		}
-		childElementsAttributes.addChildren(getAttributes(), (a, n) -> {
-			a.render(n);	
-		});
+		childElementsAttributes.addChildren(
+				getChildren().stream().filter(a -> a instanceof XmlAttribute || a instanceof XmlAttributeGroup), 
+				(a, n) -> a.render(n)
+		);
 		return type;
 	}
 	@Override
@@ -115,8 +120,11 @@ public class XmlComplexTypeImpl extends XmlTypeImpl<XmlComplexType> implements X
 			setBaseTypeNamespace(ref.getNamespace());
 		}
 		setBaseTypeSimple(simpleContent != null);
-		content.search(n -> "attribute".equals(n.getName())).forEach(n -> {
-			addAttribute(n.getAttribute("name")).loadFromNode(n);
+		content.search(n -> Arrays.asList("attribute","attributeGroup").contains(n.getName())).forEach(n -> {
+			switch (n.getName()) {
+				case "attribute": addAttribute(n.getAttribute("name")).loadFromNode(n); break;
+				case "attributegroup": addAttributeGroup().loadFromNode(n); break; 
+			}
 		});
 		if (sequence != null) {
 			for (NodeBuilder child : sequence.getChildren()) {
@@ -149,12 +157,25 @@ public class XmlComplexTypeImpl extends XmlTypeImpl<XmlComplexType> implements X
 		return this;
 	}
 	@Override
+	public XmlAttributeGroup addAttributeGroup() {
+		XmlAttributeGroup a = new XmlAttributeGroupImpl(this);
+		elements.add(a);
+		return a;
+	}
+	@Override
 	public void duplicateInSchema(XmlComplexType targetElement, Set<String> changeToTargetNamespace) {
 		targetElement.
 			setName(getName()).
 			setBaseType(getBaseType());
-		for (XmlAttribute a: getAttributes()) {
-			a.duplicateInSchema(targetElement.addAttribute(a.getName()), changeToTargetNamespace);			
+		for (XmlNode<?> a: getChildren()) {
+			if (a instanceof XmlAttribute) {
+				XmlAttribute xmlAttribute = (XmlAttribute) a;
+				xmlAttribute.duplicateInSchema(targetElement.addAttribute(xmlAttribute.getName()), changeToTargetNamespace);
+			}			
+			else if (a instanceof XmlAttributeGroup) {
+				XmlAttributeGroup xmlAttributeGroup = (XmlAttributeGroup) a;
+				xmlAttributeGroup.duplicateInSchema(targetElement.addAttributeGroup(), changeToTargetNamespace);
+			}			
 		}
 		for (XmlNode<?> node : getChildren()) {
 			if (node instanceof XmlElement) {
@@ -174,6 +195,9 @@ public class XmlComplexTypeImpl extends XmlTypeImpl<XmlComplexType> implements X
 				c.duplicateInSchema(targetElement.addAll(), changeToTargetNamespace);
 			}
 			else if (node instanceof XmlAttribute) {
+				// nothing, attributes are processed above
+			}
+			else if (node instanceof XmlAttributeGroup) {
 				// nothing, attributes are processed above
 			}
 			else {

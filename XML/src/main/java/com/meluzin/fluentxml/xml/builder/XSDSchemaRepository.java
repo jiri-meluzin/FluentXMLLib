@@ -20,7 +20,7 @@ import com.meluzin.functional.Lists;
 
 public class XSDSchemaRepository extends BaseSchemaRepository<XmlSchema> {
 	private XSDSchemaRepository(SchemaRepository schemaRepository) {
-		super(schemaRepository, Lists.asList(XsdBuiltInTypes.getBuiltInTypes()));
+		super(schemaRepository, Lists.asList(XsdBuiltInTypes.getBuiltInTypes(), XsdBuiltInTypes.getSOAPBuiltInTypes(), XsdBuiltInTypes.getBuiltInXmlTypes()));
 		
 	}
 	public XSDSchemaRepository(SchemaRepository schemaRepository, XmlSchema... schemas) {
@@ -32,11 +32,11 @@ public class XSDSchemaRepository extends BaseSchemaRepository<XmlSchema> {
 		addSchema(schemas);
 	}
 	public XSDSchemaRepository(XmlSchema... schemas) {
-		addSchema(Lists.asList(XsdBuiltInTypes.getBuiltInTypes()));
+		addSchema(Lists.asList(XsdBuiltInTypes.getBuiltInTypes(), XsdBuiltInTypes.getSOAPBuiltInTypes(), XsdBuiltInTypes.getBuiltInXmlTypes()));
 		addSchema(Lists.asList(schemas));
 	}
 	public XSDSchemaRepository(Collection<XmlSchema> schemas) {
-		addSchema(Lists.asList(XsdBuiltInTypes.getBuiltInTypes()));
+		addSchema(Lists.asList(XsdBuiltInTypes.getBuiltInTypes(), XsdBuiltInTypes.getSOAPBuiltInTypes(), XsdBuiltInTypes.getBuiltInXmlTypes()));
 		addSchema(schemas);
 	}
 	public XmlNode<?> findReference(ReferenceInfo ref) {
@@ -52,15 +52,20 @@ public class XSDSchemaRepository extends BaseSchemaRepository<XmlSchema> {
 		if (ref == null) throw new NoSuchElementException("Unknown element: {" + elementNamespace +  "}:"+ elementName);
 		return ref;
 	}
-	public XmlAttribute findReferenceAttribute(String elementName, String elementNamespace) {
+	public XmlAttribute findReferenceAttribute(String attributeName, String elementNamespace) {
 		XmlAttribute ref = 
 				getSchemas().stream().filter(s -> s.getTargetNamespace() != null && s.getTargetNamespace().equals(elementNamespace)).
 				flatMap(s -> s.getElements().stream()).
-				filter(e -> (e instanceof XmlAttribute && elementName.equals(e.asAttribute().getName()))).
+				filter(e -> (e instanceof XmlAttribute && attributeName.equals(e.asAttribute().getName()))).
 				map(e -> e.asAttribute()).
 				findFirst().orElse(null)
 			;
-		if (ref == null) throw new NoSuchElementException("Unknown element: {" + elementNamespace +  "}:"+ elementName);
+		if (ref == null && elementNamespace == null) {
+			ref = XsdBuiltInTypes.getBuiltInXmlTypes().getElements().stream().filter(n -> n instanceof XmlAttribute).map(a -> a.asAttribute()).filter(a -> a.getName().equals(attributeName)).findFirst().orElse(null);
+		}
+		if (ref == null) {
+			throw new NoSuchElementException("Unknown element: {" + elementNamespace +  "}:"+ attributeName);
+		}
 		return ref;
 	}
 	public XmlNode<?> findType(ReferenceInfo ref) {

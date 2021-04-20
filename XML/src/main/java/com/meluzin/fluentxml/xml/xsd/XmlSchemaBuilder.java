@@ -16,6 +16,7 @@ import com.meluzin.fluentxml.xml.builder.SchemaReference;
 import com.meluzin.fluentxml.xml.builder.XmlBuilderFactory;
 import com.meluzin.fluentxml.xml.xsd.XmlNode.XmlSchema;
 import com.meluzin.fluentxml.xml.xsd.impl.BaseXmlNode;
+import com.meluzin.fluentxml.xml.xsd.impl.XmlAttributeGroupImpl;
 import com.meluzin.fluentxml.xml.xsd.impl.XmlAttributeImpl;
 import com.meluzin.fluentxml.xml.xsd.impl.XmlComplexTypeImpl;
 import com.meluzin.fluentxml.xml.xsd.impl.XmlElementImpl;
@@ -147,6 +148,12 @@ public class XmlSchemaBuilder extends BaseXmlNode<XmlSchema> implements XmlSchem
 	@Override
 	public XmlAttribute addAttribute(String name) {
 		XmlAttribute type = new XmlAttributeImpl(this).setName(name);
+		elements.add(type);
+		return type;
+	}
+	@Override
+	public XmlAttributeGroup addAttributeGroup() {
+		XmlAttributeGroup type = new XmlAttributeGroupImpl(this);
 		elements.add(type);
 		return type;
 	}
@@ -299,6 +306,9 @@ public class XmlSchemaBuilder extends BaseXmlNode<XmlSchema> implements XmlSchem
 			else if ("attribute".equals(el.getName())) {
 				addAttribute(el.getAttribute("name")).loadFromNode(el);
 			}
+			else if ("attributeGroup".equals(el.getName())) {
+				addAttributeGroup().loadFromNode(el);
+			}
 			else if ("import".equals(el.getName())) {
 				String namespace = el.getAttribute("namespace");
 				importNamespace(namespace, el.getAttribute("schemaLocation"));			
@@ -306,6 +316,9 @@ public class XmlSchemaBuilder extends BaseXmlNode<XmlSchema> implements XmlSchem
 			}
 			else if ("annotation".equals(el.getName()) || el.isTextNode()) {
 				// ignore annotations
+			}
+			else if ("notation".equals(el.getName())) {
+				// ignore notation
 			}
 			else if ("include".equals(el.getName())) {
 				// ignore includes
