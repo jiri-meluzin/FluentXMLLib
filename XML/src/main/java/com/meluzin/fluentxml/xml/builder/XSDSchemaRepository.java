@@ -68,7 +68,7 @@ public class XSDSchemaRepository extends BaseSchemaRepository<XmlSchema> {
 		}
 		return ref;
 	}
-	public XmlNode<?> findType(ReferenceInfo ref) {
+	public XmlType<?> findType(ReferenceInfo ref) {
 		return findType(ref.getLocalName(), ref.getNamespace());
 	}
 	public XmlType<?> findType(String typeName, String typeNamespace) {		

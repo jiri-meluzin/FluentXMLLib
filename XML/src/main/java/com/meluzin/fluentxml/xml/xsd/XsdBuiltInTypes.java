@@ -26,9 +26,9 @@ public class XsdBuiltInTypes {
 		return xml;
 	}
 	static {
-		xml = new XmlSchemaBuilder().loadFromNode(new XmlBuilderFactory().parseDocument(XsdBuiltInTypes.class.getClass().getResourceAsStream("/xml.xsd")));
-		xsd = new XmlSchemaBuilder().loadFromNode(new XmlBuilderFactory().parseDocument(XsdBuiltInTypes.class.getClass().getResourceAsStream("/XMLSchema.xsd")));
+		xml = new XmlSchemaBuilder().loadFromNode(new XmlBuilderFactory().parseDocument(XsdBuiltInTypes.class.getResourceAsStream("/xml.xsd")));
+		xsd = new XmlSchemaBuilder().loadFromNode(new XmlBuilderFactory().parseDocument(XsdBuiltInTypes.class.getResourceAsStream("/XMLSchema.xsd")));
 		xsd.addType("anySimpleType");
-		soap = new XmlSchemaBuilder().loadFromNode(new XmlBuilderFactory().parseDocument(XsdBuiltInTypes.class.getClass().getResourceAsStream("/schemas.xmlsoap.org.xsd")));
+		soap = new XmlSchemaBuilder().loadFromNode(new XmlBuilderFactory().parseDocument(XsdBuiltInTypes.class.getResourceAsStream("/schemas.xmlsoap.org.xsd")));
 	}
 }
