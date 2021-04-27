@@ -449,6 +449,7 @@ public class NodeBuilderImpl implements NodeBuilder {
 		n.name = name;
 		n.prefix = prefix;
 		n.namespaces.putAll(namespaces);
+		n.textNode = textNode;
 		for (String p: prefixedAttributes.keySet()) {
 			n.prefixedAttributes.put(p, new HashMap<>(prefixedAttributes.get(p)));
 		}			
@@ -557,7 +558,7 @@ public class NodeBuilderImpl implements NodeBuilder {
 			if (textNode != other.textNode)
 				return Optional.of(getXPath() + " - Other has here textnode");
 			if (content == null || content.trim().isEmpty()) {
-				if (other.content != null && !content.trim().isEmpty())
+				if (other.content != null && !other.content.trim().isEmpty())
 					return Optional.of(getXPath() + " - Other has here textcontent: " + other.content);
 			} else if (!content.trim().equals(other.content == null ? "" : other.content.trim()))
 				return Optional.of(getXPath() + " - Other has here different textcontent: " + content + " != " + other.content);

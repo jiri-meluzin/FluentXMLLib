@@ -3,9 +3,12 @@ package com.meluzin.fluentxml.xml.builder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.WeakHashMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.meluzin.fluentxml.xml.xsd.XmlNode;
 import com.meluzin.fluentxml.xml.xsd.XmlNode.ReferenceInfo;
@@ -19,6 +22,9 @@ import com.meluzin.fluentxml.xml.xsd.XsdBuiltInTypes;
 import com.meluzin.functional.Lists;
 
 public class XSDSchemaRepository extends BaseSchemaRepository<XmlSchema> {
+	private boolean enabledCache = false;
+	private Map<String, List<XmlSchema>> schemaCache = new WeakHashMap<>();
+	private Map<ReferenceInfo, XmlType<?>> typeCache = new WeakHashMap<>();
 	private XSDSchemaRepository(SchemaRepository schemaRepository) {
 		super(schemaRepository, Lists.asList(XsdBuiltInTypes.getBuiltInTypes(), XsdBuiltInTypes.getSOAPBuiltInTypes(), XsdBuiltInTypes.getBuiltInXmlTypes()));
 		
@@ -44,7 +50,8 @@ public class XSDSchemaRepository extends BaseSchemaRepository<XmlSchema> {
 	}
 	public XmlNode<?> findReference(String elementName, String elementNamespace) {
 		XmlNode<?> ref = 
-				getSchemas().stream().filter(s -> s.getTargetNamespace() != null && s.getTargetNamespace().equals(elementNamespace)).
+				//getSchemas().stream().filter(s -> s.getTargetNamespace() != null && s.getTargetNamespace().equals(elementNamespace)).
+				getSchemas(elementNamespace).
 				flatMap(s -> s.getElements().stream()).
 				filter(e -> (e instanceof XmlElement && elementName.equals(e.asElement().getName()))|| (e instanceof XmlGroup && elementName.equals(((XmlGroup)e).getName()))).
 				findFirst().orElse(null)
@@ -53,8 +60,8 @@ public class XSDSchemaRepository extends BaseSchemaRepository<XmlSchema> {
 		return ref;
 	}
 	public XmlAttribute findReferenceAttribute(String attributeName, String elementNamespace) {
-		XmlAttribute ref = 
-				getSchemas().stream().filter(s -> s.getTargetNamespace() != null && s.getTargetNamespace().equals(elementNamespace)).
+		XmlAttribute ref =
+				getSchemas(elementNamespace).
 				flatMap(s -> s.getElements().stream()).
 				filter(e -> (e instanceof XmlAttribute && attributeName.equals(e.asAttribute().getName()))).
 				map(e -> e.asAttribute()).
@@ -71,8 +78,13 @@ public class XSDSchemaRepository extends BaseSchemaRepository<XmlSchema> {
 	public XmlType<?> findType(ReferenceInfo ref) {
 		return findType(ref.getLocalName(), ref.getNamespace());
 	}
-	public XmlType<?> findType(String typeName, String typeNamespace) {		
-		XmlType<?> type = getSchemas().stream().filter(s ->  (s.getTargetNamespace() != null && s.getTargetNamespace().equals(typeNamespace)) || typeNamespace==s.getTargetNamespace()).
+	public XmlType<?> findType(String typeName, String typeNamespace) {
+		if (!enabledCache) return doFind(typeName, typeNamespace);
+		ReferenceInfo typeRef = new ReferenceInfoImpl(typeNamespace, typeName);
+		return typeCache.computeIfAbsent(typeRef, (tr) -> doFind(typeName, typeNamespace));		
+	}
+	private XmlType<?> doFind(String typeName, String typeNamespace) {
+		XmlType<?> type = getSchemas(typeNamespace).
 				flatMap(s -> s.getElements().stream()).
 				filter(e -> e instanceof XmlType && typeName.equals(((XmlType<?>)e).getName())).
 				map(t -> (XmlType<?>)t).
@@ -82,6 +94,27 @@ public class XSDSchemaRepository extends BaseSchemaRepository<XmlSchema> {
 			throw new NoSuchElementException("Unknown type: {" + typeNamespace +  "}:"+ typeName);
 		}
 		return type;
+	}
+	public boolean isEnabledCache() {
+		return enabledCache;
+	}
+	public void setEnabledCache(boolean enabledCache) {
+		if (enabledCache != this.enabledCache) clearCache();
+		this.enabledCache = enabledCache;		
+	}
+	public void clearCache() {
+		schemaCache.clear();
+		typeCache.clear();
+	}
+	private Stream<XmlSchema> getSchemas(String typeNamespace) {
+		if (!enabledCache) return doGetSchemas(typeNamespace);
+		if (!schemaCache.containsKey(typeNamespace)) {
+			schemaCache.put(typeNamespace, doGetSchemas(typeNamespace).collect(Collectors.toList()));
+		}
+		return schemaCache.get(typeNamespace).stream();
+	}
+	private Stream<XmlSchema> doGetSchemas(String typeNamespace) {
+		return getSchemas().stream().filter(s ->  (s.getTargetNamespace() != null && s.getTargetNamespace().equals(typeNamespace)) || typeNamespace==s.getTargetNamespace());
 	}
 	public XmlType<?> findType(String typeName) {		
 		XmlType<?> type = getSchemas().stream().//filter(s ->  s.getTargetNamespace() != null && s.getTargetNamespace().equals(typeNamespace)).
