@@ -179,10 +179,15 @@ public class XSDSchemaRepository extends BaseSchemaRepository<XmlSchema> {
 			XmlType<?> t = (XmlType<?>)tree;
 			XmlType<?> r = (XmlType<?>)target;
 			
-			if (t.getBaseType() != null && t.getBaseType().equals(r.getName()) && t.getBaseTypeNamespace().equals(r.getSchemaTargetNamespace())) list.add(t);
-			else if (t instanceof XmlComplexType) {
+			if (t.getBaseType() != null) {
+				if (t.getBaseType().equals(r.getName()) && t.getBaseTypeNamespace().equals(r.getSchemaTargetNamespace())) list.add(t);
+				else {
+					references.add(doFindAllReferences(newHashSet, findType(t.getBaseType(), t.getBaseTypeNamespace()), target));						
+				}
+			}
+			if (t instanceof XmlComplexType) {
 				XmlComplexType c = (XmlComplexType)t;
-				references = c.getChildren().stream().map(e -> doFindAllReferences(newHashSet, e, target)).collect(Collectors.toList());
+				references.addAll(c.getChildren().stream().map(e -> doFindAllReferences(newHashSet, e, target)).collect(Collectors.toList()));
 			}
 		}
 		else if (tree instanceof XmlGroup) {
@@ -216,15 +221,14 @@ public class XSDSchemaRepository extends BaseSchemaRepository<XmlSchema> {
 			if (t.getType() != null) {
 				if (t.getType().equals(r.getName()) && t.getTypeNamespace().equals(r.getSchemaTargetNamespace())) list.add(t);
 				else {
-					references = Arrays.asList(doFindAllReferences(newHashSet, findType(t.getType(), t.getTypeNamespace()), target));
+					references.add(doFindAllReferences(newHashSet, findType(t.getType(), t.getTypeNamespace()), target));
 				}
 			}
 			else if (t.getRef() != null) {
-				references = Arrays.asList(doFindAllReferences(newHashSet, findReference(t.getRef(), t.getRefNamespace()), target));
+				references.add(doFindAllReferences(newHashSet, findReference(t.getRef(), t.getRefNamespace()), target));
 			}
-			else if (t.getComplexType() != null){
-				references = t.getComplexType().getChildren().stream().map(e -> doFindAllReferences(newHashSet, e, target)).collect(Collectors.toList());
-				
+			if (t.getComplexType() != null){
+				references.addAll(t.getComplexType().getChildren().stream().map(e -> doFindAllReferences(newHashSet, e, target)).collect(Collectors.toList()));
 			}
 		}
 		else if (tree instanceof XmlElement && target instanceof XmlElement) {
@@ -232,8 +236,8 @@ public class XSDSchemaRepository extends BaseSchemaRepository<XmlSchema> {
 			XmlElement r = (XmlElement)target;
 			
 			if (t.getRef() != null && t.getRef().equals(r.getName()) && t.getRefNamespace().equals(r.getSchemaTargetNamespace())) list.add(t);
-			else if (t.getComplexType() != null){
-				references = t.getComplexType().getChildren().stream().map(e -> doFindAllReferences(newHashSet, e, target)).collect(Collectors.toList());
+			if (t.getComplexType() != null){
+				references.addAll(t.getComplexType().getChildren().stream().map(e -> doFindAllReferences(newHashSet, e, target)).collect(Collectors.toList()));
 				
 			}
 		}
