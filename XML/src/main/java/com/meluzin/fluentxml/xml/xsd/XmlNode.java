@@ -55,6 +55,7 @@ public interface XmlNode<T extends BaseBuilder<T>> extends BaseBuilder<T> {
 		public XmlGroup setMaxOccurs(String maxOccurs);
 		public XmlElement addElement(String name);
 		public XmlSequence addSequence();
+		public XmlChoice addChoice();
 		public XmlAll addAll();
 		public XmlNode<?> getChild();
 	}

@@ -37,6 +37,7 @@ public class XmlGroupImpl extends BaseXmlNode<XmlGroup> implements XmlGroup {
 		node.getChildren().forEach(n -> {
 			if ("sequence".equals(n.getName())) addSequence().loadFromNode(n);
 			else if ("all".equals(n.getName())) addAll().loadFromNode(n);
+			else if ("choice".equals(n.getName())) addChoice().loadFromNode(n);
 			else if ("element".equals(n.getName())) addElement(n.getAttribute("name")).loadFromNode(n);
 			else if ("annotation".equals(n.getName())) {
 				setDocumentation(n.search("documentation").map(nn -> nn.getTextContent()).filter(nn -> nn != null).findFirst());
@@ -110,7 +111,11 @@ public class XmlGroupImpl extends BaseXmlNode<XmlGroup> implements XmlGroup {
 		this.child = new XmlSequenceImpl(this);
 		return (XmlSequence)child;
 	}
-
+	@Override
+	public XmlChoice addChoice() {
+		this.child = new XmlChoiceImpl(this);
+		return (XmlChoice)child;
+	}
 	@Override
 	public XmlAll addAll() {
 		this.child = new XmlAllImpl(this);				

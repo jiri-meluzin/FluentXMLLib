@@ -19,7 +19,7 @@ public abstract class XmlTypeImpl<T extends XmlType<T>> extends BaseXmlNode<T> i
 	@SuppressWarnings("unchecked")
 	@Override
 	public T setName(String name) {
-		this.name = name;
+		this.name = name != null ? name.trim() : null;
 		return (T)this;
 	}
 

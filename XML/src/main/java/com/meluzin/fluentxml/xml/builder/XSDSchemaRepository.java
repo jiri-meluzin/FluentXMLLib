@@ -1,10 +1,13 @@
 package com.meluzin.fluentxml.xml.builder;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -12,7 +15,9 @@ import java.util.stream.Stream;
 
 import com.meluzin.fluentxml.xml.xsd.XmlNode;
 import com.meluzin.fluentxml.xml.xsd.XmlNode.ReferenceInfo;
+import com.meluzin.fluentxml.xml.xsd.XmlNode.XmlAll;
 import com.meluzin.fluentxml.xml.xsd.XmlNode.XmlAttribute;
+import com.meluzin.fluentxml.xml.xsd.XmlNode.XmlChoice;
 import com.meluzin.fluentxml.xml.xsd.XmlNode.XmlComplexType;
 import com.meluzin.fluentxml.xml.xsd.XmlNode.XmlElement;
 import com.meluzin.fluentxml.xml.xsd.XmlNode.XmlGroup;
@@ -25,6 +30,7 @@ public class XSDSchemaRepository extends BaseSchemaRepository<XmlSchema> {
 	private boolean enabledCache = false;
 	private Map<String, List<XmlSchema>> schemaCache = new WeakHashMap<>();
 	private Map<ReferenceInfo, XmlType<?>> typeCache = new WeakHashMap<>();
+	private Map<ReferenceInfo, XmlGroup> groupCache = new WeakHashMap<>();
 	private XSDSchemaRepository(SchemaRepository schemaRepository) {
 		super(schemaRepository, Lists.asList(XsdBuiltInTypes.getBuiltInTypes(), XsdBuiltInTypes.getSOAPBuiltInTypes(), XsdBuiltInTypes.getBuiltInXmlTypes()));
 		
@@ -105,6 +111,7 @@ public class XSDSchemaRepository extends BaseSchemaRepository<XmlSchema> {
 	public void clearCache() {
 		schemaCache.clear();
 		typeCache.clear();
+		groupCache.clear();
 	}
 	private Stream<XmlSchema> getSchemas(String typeNamespace) {
 		if (!enabledCache) return doGetSchemas(typeNamespace);
@@ -153,12 +160,18 @@ public class XSDSchemaRepository extends BaseSchemaRepository<XmlSchema> {
 		throw new NoSuchElementException("not found for given filter");
 	}
 	public List<XmlNode<?>> findAllReferencesTo(XmlNode<?> tree, XmlNode<?> target) {
+		return doFindAllReferences(new HashSet<XmlNode<?>>(), tree, target);
+	}
+	private List<XmlNode<?>> doFindAllReferences(Set<XmlNode<?>> processed, XmlNode<?> tree, XmlNode<?> target) {
+		if (processed.contains(tree)) return Arrays.asList();
+		HashSet<XmlNode<?>> newHashSet = new HashSet<XmlNode<?>>(processed);
+		newHashSet.add(tree);
 		List<XmlNode<?>> list = new ArrayList<XmlNode<?>>();
 		List<List<XmlNode<?>>> references = new ArrayList<List<XmlNode<?>>>();
 		if (tree instanceof XmlSchema) {
 			references = 
 					tree.asSchema().getElements().stream().
-						map(e -> findAllReferencesTo(e, target)).
+						map(e -> doFindAllReferences(newHashSet, e, target)).
 						collect(Collectors.toList());
 			
 		}
@@ -169,14 +182,50 @@ public class XSDSchemaRepository extends BaseSchemaRepository<XmlSchema> {
 			if (t.getBaseType() != null && t.getBaseType().equals(r.getName()) && t.getBaseTypeNamespace().equals(r.getSchemaTargetNamespace())) list.add(t);
 			else if (t instanceof XmlComplexType) {
 				XmlComplexType c = (XmlComplexType)t;
-				references = c.getChildren().stream().map(e -> findAllReferencesTo(e, target)).collect(Collectors.toList());
+				references = c.getChildren().stream().map(e -> doFindAllReferences(newHashSet, e, target)).collect(Collectors.toList());
 			}
+		}
+		else if (tree instanceof XmlGroup) {
+			XmlGroup t = (XmlGroup)tree;
+			
+			if (target instanceof XmlGroup) {
+				XmlGroup r = (XmlGroup)target;
+				if (t.getRef() != null) {
+					if (t.getRef().equals(r.getName()) && t.getRefNamespace().equals(r.getSchemaTargetNamespace())) list.add(t);
+					else {
+						references = Arrays.asList(doFindAllReferences(newHashSet, findReference(t.getRef(), t.getRefNamespace()), target));						
+					}
+				}
+			}
+			if (t.getChild() != null) {
+				references = Arrays.asList(doFindAllReferences(newHashSet, t.getChild(), target));
+			}
+		}
+		else if (tree instanceof XmlChoice) {
+			XmlChoice t = (XmlChoice)tree;
+			references = t.getChildren().stream().map(n -> doFindAllReferences(newHashSet, n, target)).collect(Collectors.toList());
+		}
+		else if (tree instanceof XmlAll) {
+			XmlAll t = (XmlAll)tree;
+			references = t.getChildren().stream().map(n -> doFindAllReferences(newHashSet, n, target)).collect(Collectors.toList());
 		}
 		else if (tree instanceof XmlElement && target instanceof XmlType<?>) {
 			XmlElement t = (XmlElement)tree;
 			XmlType<?> r = (XmlType<?>)target;
 			
-			if (t.getType() != null && t.getType().equals(r.getName()) && t.getTypeNamespace().equals(r.getSchemaTargetNamespace())) list.add(t);
+			if (t.getType() != null) {
+				if (t.getType().equals(r.getName()) && t.getTypeNamespace().equals(r.getSchemaTargetNamespace())) list.add(t);
+				else {
+					references = Arrays.asList(doFindAllReferences(newHashSet, findType(t.getType(), t.getTypeNamespace()), target));
+				}
+			}
+			else if (t.getRef() != null) {
+				references = Arrays.asList(doFindAllReferences(newHashSet, findReference(t.getRef(), t.getRefNamespace()), target));
+			}
+			else if (t.getComplexType() != null){
+				references = t.getComplexType().getChildren().stream().map(e -> doFindAllReferences(newHashSet, e, target)).collect(Collectors.toList());
+				
+			}
 		}
 		else if (tree instanceof XmlElement && target instanceof XmlElement) {
 			XmlElement t = (XmlElement)tree;
@@ -184,7 +233,7 @@ public class XSDSchemaRepository extends BaseSchemaRepository<XmlSchema> {
 			
 			if (t.getRef() != null && t.getRef().equals(r.getName()) && t.getRefNamespace().equals(r.getSchemaTargetNamespace())) list.add(t);
 			else if (t.getComplexType() != null){
-				references = t.getComplexType().getChildren().stream().map(e -> findAllReferencesTo(e, target)).collect(Collectors.toList());
+				references = t.getComplexType().getChildren().stream().map(e -> doFindAllReferences(newHashSet, e, target)).collect(Collectors.toList());
 				
 			}
 		}
@@ -199,5 +248,19 @@ public class XSDSchemaRepository extends BaseSchemaRepository<XmlSchema> {
 			list.addAll(findAllReferencesTo(xmlSchema, node));
 		}
 		return list;
+	}
+	public XmlGroup findGroup(String groupName, String groupNamespace) {
+		if (!enabledCache) return doFindGroup(groupName, groupNamespace);		
+		ReferenceInfo groupRef = new ReferenceInfoImpl(groupNamespace, groupName);
+		return groupCache.computeIfAbsent(groupRef, (ref) -> doFindGroup(groupName, groupNamespace));
+	}
+	private XmlGroup doFindGroup(String groupName, String groupNamespace) {
+		
+		XmlGroup group = getSchemas(groupNamespace).map(s -> s.getElements().stream()).flatMap(g -> g).filter(g -> g instanceof XmlGroup).map(g -> (XmlGroup)g).filter(g -> groupName.equals(g.getName())).findAny().orElse(null);
+
+		if (group == null) {
+			throw new NoSuchElementException("Unknown group: {" + groupNamespace +  "}:"+ groupName);
+		}
+		return group;
 	}
 }
