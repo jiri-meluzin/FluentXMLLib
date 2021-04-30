@@ -642,7 +642,7 @@ public class NodeBuilderImpl implements NodeBuilder {
 		} else if (!isChildrenListEqual(other))
 			return false;
 		if (content == null || content.trim().isEmpty()) {
-			if (other.content != null && !content.trim().isEmpty())
+			if (other.content != null && (!other.content.trim().isEmpty()))
 				return false;
 		} else if (!content.trim().equals(other.content == null ? "" : other.content.trim()))
 			return false;
