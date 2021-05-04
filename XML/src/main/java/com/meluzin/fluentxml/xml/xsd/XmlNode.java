@@ -118,6 +118,8 @@ public interface XmlNode<T extends BaseBuilder<T>> extends BaseBuilder<T> {
 		public XmlAttribute setUse(String use);
 		public String getFixed();
 		public XmlAttribute setFixed(String fixed);
+		public String getDefault();
+		public XmlAttribute setDefault(String defaultValue);
 		public String getTypeNamespace();
 		public XmlAttribute setTypeNamespace(String typeNamespace);
 		public XmlSimpleType addSimpleType();
@@ -145,6 +147,10 @@ public interface XmlNode<T extends BaseBuilder<T>> extends BaseBuilder<T> {
 		public List<XmlNode<?>> getChildren();
 		public String getContentType();
 		public XmlComplexType setContentType(String contentType);
+		public String getGroupRef();
+		public String getGroupRefNamespace();
+		public XmlComplexType setGroupRef(String groupRef);
+		public XmlComplexType setGroupRefNamespace(String groupRefNamespace);
 		//public List<XmlAttribute> getAttributes();
 		public void duplicateInSchema(XmlComplexType targetElement, Set<String> changeToTargetNamespace);
 		public XmlAttributeGroup addAttributeGroup();

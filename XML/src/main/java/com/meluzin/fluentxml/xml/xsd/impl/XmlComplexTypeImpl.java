@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import com.meluzin.fluentxml.xml.builder.NodeBuilder;
 import com.meluzin.fluentxml.xml.builder.ReferenceInfoImpl;
 import com.meluzin.fluentxml.xml.xsd.XmlNode;
+import com.meluzin.fluentxml.xml.xsd.XmlNode.ReferenceInfo;
 import com.meluzin.fluentxml.xml.xsd.XmlNode.XmlComplexType;
 import com.meluzin.functional.Lists;
 
@@ -17,7 +18,11 @@ import com.meluzin.functional.Lists;
 public class XmlComplexTypeImpl extends XmlTypeImpl<XmlComplexType> implements XmlComplexType {
 	private boolean isBaseTypeSimple = false;
 	private List<XmlNode<?>> elements = new ArrayList<>();
-	private String contentType = "sequence"; // can be group, all, choice, sequence 
+	private String contentType = "sequence"; // can be group, all, choice, sequence
+	private String minOccurs;
+	private String maxOccurs;
+	private String groupRef;
+	private String groupRefNamespace;
 	//private List<XmlAttribute> attributes = new ArrayList<>();
 	public XmlComplexTypeImpl(XmlNode<?> parent) {
 		super(parent);			
@@ -91,7 +96,12 @@ public class XmlComplexTypeImpl extends XmlTypeImpl<XmlComplexType> implements X
 			childElementsAttributes = childElements;
 		}
 		if (!isBaseTypeSimple()) {
-			childElements = childElements.addChild(contentType);
+			childElements = childElements.
+					addChild(contentType).
+						addAttribute("minOccurs", getMinOccurs()).
+						addAttribute("maxOccurs", getMaxOccurs()).
+						addAttribute("ref", getQualifiedName(getGroupRefNamespace(), getGroupRef(), parent));
+						//addAttribute("ref", childElementsAttributes);
 		}
 		for (XmlNode<?> el : getChildren()) {
 			if (el instanceof XmlAttribute) {
@@ -113,7 +123,14 @@ public class XmlComplexTypeImpl extends XmlTypeImpl<XmlComplexType> implements X
 		NodeBuilder complexContent = node.searchFirstByName("complexContent");
 		NodeBuilder content = complexContent != null ? complexContent.searchFirstByName("restriction") != null ?  complexContent.searchFirstByName("restriction") : complexContent.searchFirstByName("extension") : simpleContent != null ? simpleContent.searchFirstByName("extension") : node;
 		NodeBuilder sequence = content.searchFirst(n -> Lists.asList("group","all","choice","sequence").contains(n.getName())); //getChildren().size() == 1 ? content.getChildren().get(0) : null; 
-		if (sequence != null) contentType = sequence.getName();
+		if (sequence != null) {
+			contentType = sequence.getName();
+			minOccurs = sequence.getAttribute("minOccurs");
+			maxOccurs = sequence.getAttribute("maxOccurs");
+
+			ReferenceInfo r = parseQualifiedName(sequence.getAttribute("ref"), sequence);
+			setGroupRef(r.getLocalName()).setGroupRefNamespace(r.getNamespace());	
+		}
 		if (content.getAttribute("base") != null) {
 			ReferenceInfoImpl ref = new ReferenceInfoImpl(content.getAttribute("base"), content);
 			setBaseType(ref.getLocalName());
@@ -166,7 +183,11 @@ public class XmlComplexTypeImpl extends XmlTypeImpl<XmlComplexType> implements X
 	public void duplicateInSchema(XmlComplexType targetElement, Set<String> changeToTargetNamespace) {
 		targetElement.
 			setName(getName()).
-			setBaseType(getBaseType());
+			setBaseType(getBaseType()).
+			setMaxOccurs(getMaxOccurs()).
+			setMinOccurs(getMinOccurs()).
+			setGroupRef(getGroupRef()).
+			setGroupRefNamespace(getGroupRefNamespace());
 		for (XmlNode<?> a: getChildren()) {
 			if (a instanceof XmlAttribute) {
 				XmlAttribute xmlAttribute = (XmlAttribute) a;
@@ -220,18 +241,38 @@ public class XmlComplexTypeImpl extends XmlTypeImpl<XmlComplexType> implements X
 	}
 	@Override
 	public String getMinOccurs() {
-		throw new UnsupportedOperationException("XmlComplextType does not support minOccurs");
+		return minOccurs;
 	}
 	@Override
 	public XmlComplexType setMinOccurs(String minOccurs) {
-		throw new UnsupportedOperationException("XmlComplextType does not support minOccurs");
+		this.minOccurs = minOccurs;
+		return this;
 	}
 	@Override
 	public String getMaxOccurs() {
-		throw new UnsupportedOperationException("XmlComplextType does not support maxOccurs");
+		return maxOccurs;
 	}
 	@Override
-	public XmlComplexType setMaxOccurs(String name) {
-		throw new UnsupportedOperationException("XmlComplextType does not support maxOccurs");
+	public XmlComplexType setMaxOccurs(String maxOccurs) {
+		this.maxOccurs = maxOccurs;
+		return this;
+	}
+	@Override
+	public String getGroupRef() {
+		return groupRef;
+	}
+	@Override
+	public String getGroupRefNamespace() {
+		return groupRefNamespace;
+	}
+	@Override
+	public XmlComplexType setGroupRef(String groupRef) {
+		this.groupRef = groupRef;
+		return this;
+	}
+	@Override
+	public XmlComplexType setGroupRefNamespace(String groupRefNamespace) {
+		this.groupRefNamespace = groupRefNamespace;
+		return this;
 	}
 }

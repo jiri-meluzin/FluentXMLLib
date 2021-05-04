@@ -84,6 +84,11 @@ public class T {
 			this.b = b;
 			return this;
 		}
+		@SuppressWarnings("unchecked")
+		@Override
+		public V2<A, B> setA(A a) {
+			return (V2<A, B>)super.setA(a);
+		}
 		@Override
 		public String toString() {
 			return super.toString() + ";B="+b;
@@ -125,6 +130,16 @@ public class T {
 		public V3<A, B, C> setC(C c) {
 			this.c = c;
 			return this;
+		}
+		@SuppressWarnings("unchecked")
+		@Override
+		public V3<A, B, C> setA(A a) {
+			return (V3<A, B, C>)super.setA(a);
+		}
+		@SuppressWarnings("unchecked")
+		@Override
+		public V3<A, B, C> setB(B b) {
+			return (V3<A, B, C>)super.setB(b);
 		}
 		@Override
 		public String toString() {
@@ -168,6 +183,21 @@ public class T {
 			this.d = d;
 			return this;
 		}
+		@SuppressWarnings("unchecked")
+		@Override
+		public V4<A, B, C, D> setA(A a) {
+			return (V4<A, B, C, D>)super.setA(a);
+		}
+		@SuppressWarnings("unchecked")
+		@Override
+		public V4<A, B, C, D> setB(B b) {
+			return (V4<A, B, C, D>)super.setB(b);
+		}
+		@SuppressWarnings("unchecked")
+		@Override
+		public V4<A, B, C, D> setC(C c) {
+			return (V4<A, B, C, D>)super.setC(c);
+		}
 		@Override
 		public String toString() {
 			return super.toString() + ";D="+d;
@@ -208,6 +238,26 @@ public class T {
 		public V5<A, B, C, D, E> setE(E e) {
 			this.e = e;
 			return this;
+		}
+		@SuppressWarnings("unchecked")
+		@Override
+		public V5<A, B, C, D, E> setA(A a) {
+			return (V5<A, B, C, D, E>)super.setA(a);
+		}
+		@SuppressWarnings("unchecked")
+		@Override
+		public V5<A, B, C, D, E> setB(B b) {
+			return (V5<A, B, C, D, E>)super.setB(b);
+		}
+		@SuppressWarnings("unchecked")
+		@Override
+		public V5<A, B, C, D, E> setC(C c) {
+			return (V5<A, B, C, D, E>)super.setC(c);
+		}
+		@SuppressWarnings("unchecked")
+		@Override
+		public V5<A, B, C, D, E> setD(D d) {
+			return (V5<A, B, C, D, E>)super.setD(d);
 		}
 		@Override
 		public String toString() {

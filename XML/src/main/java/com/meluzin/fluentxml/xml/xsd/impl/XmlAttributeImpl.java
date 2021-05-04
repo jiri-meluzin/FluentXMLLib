@@ -16,6 +16,7 @@ public class XmlAttributeImpl extends BaseXmlNode<XmlAttribute> implements XmlAt
 	private String type;
 	private String typeNamespace;
 	private String fixed;
+	private String defaultValue;
 	private XmlSimpleType simpleType;
 	public XmlAttributeImpl(XmlNode<?> parent) {
 		super(parent);
@@ -44,6 +45,7 @@ public class XmlAttributeImpl extends BaseXmlNode<XmlAttribute> implements XmlAt
 		this.type = type;
 		return this;
 	}
+	
 	@Override
 	public XmlAttribute setTypeNamespace(String typeNamespace) {
 		this.typeNamespace = typeNamespace;
@@ -80,7 +82,8 @@ public class XmlAttributeImpl extends BaseXmlNode<XmlAttribute> implements XmlAt
 				addAttribute("use", getUse()).
 				addAttribute("ref", getQualifiedName(getRefNamespace(), getRef(), parent)).
 				addAttribute("type", getQualifiedName(getTypeNamespace(), getType(), parent)).
-				addAttribute("fixed", getFixed());
+				addAttribute("fixed", getFixed()).
+				addAttribute("default", getDefault());
 		if (simpleType != null) {
 			simpleType.render(el);
 		}
@@ -113,6 +116,7 @@ public class XmlAttributeImpl extends BaseXmlNode<XmlAttribute> implements XmlAt
 		ReferenceInfo t = parseQualifiedName(node.getAttribute("type"), node);
 		setType(t.getLocalName()).setTypeNamespace(t.getNamespace());
 		setFixed(node.getAttribute("fixed"));
+		setDefault(node.getAttribute("default"));
 		NodeBuilder simple = node.searchFirstByName("simpleType");
 		if (simple != null) {
 			addSimpleType().loadFromNode(simple);
@@ -131,7 +135,8 @@ public class XmlAttributeImpl extends BaseXmlNode<XmlAttribute> implements XmlAt
 			setUse(getUse()).
 			setRef(getRef()).setRefNamespace(getRefNamespace() == null ? null : getRefNamespace().equals(localTargetNamespace) || changeToTargetNamespace.contains(getRefNamespace()) ? targetNamespace : getRefNamespace()).
 			setType(getType()).setTypeNamespace(getTypeNamespace() == null ? null : getTypeNamespace().equals(localTargetNamespace) || changeToTargetNamespace.contains(getTypeNamespace()) ? targetNamespace : getTypeNamespace()).
-			setFixed(getFixed());
+			setFixed(getFixed()).
+			setDefault(getDefault());
 		if (simpleType != null) {
 			simpleType.duplicateInSchema(targetElement.addSimpleType(), changeToTargetNamespace);
 		}
@@ -139,5 +144,14 @@ public class XmlAttributeImpl extends BaseXmlNode<XmlAttribute> implements XmlAt
 	@Override
 	public String toString() {
 		return getName() != null ? getName() : getRef();
+	}
+	@Override
+	public String getDefault() {
+		return defaultValue;
+	}
+	@Override
+	public XmlAttribute setDefault(String defaultValue) {
+		this.defaultValue = defaultValue;
+		return this;
 	}
 }
