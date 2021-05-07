@@ -245,6 +245,7 @@ public class XmlBuilderFactory {
 				break;
 			case Node.CDATA_SECTION_NODE:
 				node.setCDataContent(((CDATASection)n).getData());
+				break;
 			default:
 				Log.get().warning("unknown type: " + n.getNodeType());
 				break;

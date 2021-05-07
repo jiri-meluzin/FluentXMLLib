@@ -45,4 +45,8 @@ public class SchemaRepository {
 			collect(Collectors.toList());
 		return new WSDLSchemaRepository(this, schemas);
 	}
+	
+	public Map<SchemaReference, BaseSchema> getRepo() {
+		return repo;
+	}
 }
