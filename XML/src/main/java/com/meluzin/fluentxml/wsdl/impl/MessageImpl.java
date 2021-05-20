@@ -12,29 +12,18 @@ import com.meluzin.fluentxml.xml.builder.NodeBuilder;
 import com.meluzin.fluentxml.xml.xsd.XmlNode;
 import com.meluzin.functional.BuilderAction;
 
-public class MessageImpl extends NamedEntityImpl implements Message {
+public class MessageImpl extends NamedEntityImpl<Message> implements Message {
 	private static final String MESSAGE = "message";
 	private List<Part> parts = new ArrayList<>();
-	private Optional<String> documentation = Optional.empty();
 	
 	MessageImpl(NodeBuilder messageXml, com.meluzin.fluentxml.wsdl.Wsdl wsdl) {
-		super(messageXml.getAttribute("name"), wsdl);
-		this.documentation = messageXml.search("annotation").map(a -> a.search("documentation").map(d -> d.getTextContent()).filter(n -> n != null)).flatMap(a -> a).findFirst();
+		super(messageXml, wsdl);
 		if (com.meluzin.fluentxml.wsdl.Wsdl.WSDL_NAMESPACE.equals(messageXml.getNamespace()) && MESSAGE.equals(messageXml.getName())) {
 			parts = messageXml.search(false, n -> "part".equals(n.getName())).map(n -> new PartImpl(n)).collect(Collectors.toList());
 		}
 		else {
 			throw new IllegalArgumentException("Xml elements must be {"+com.meluzin.fluentxml.wsdl.Wsdl.WSDL_NAMESPACE+"}"+MESSAGE + ", but it was {" + messageXml.getNamespace() + "}" + messageXml.getName());
 		}
-	}
-	@Override
-	public Optional<String> getDocumentation() {
-		return documentation;
-	}
-	@Override
-	public Message setDocumentation(Optional<String> documentation) {
-		this.documentation = documentation;
-		return this;
 	}
 	
 	@Override

@@ -13,20 +13,19 @@ import com.meluzin.fluentxml.wsdl.Wsdl.BindingOperation;
 import com.meluzin.fluentxml.wsdl.Wsdl.MessageType;
 import com.meluzin.fluentxml.xml.builder.NodeBuilder;
 
-public class BindingOperationImpl implements BindingOperation {
+public class BindingOperationImpl extends NamedEntityImpl<BindingOperation> implements BindingOperation {
 	private static final String OPERATION = "operation";
 
 	private Optional<String> soapAction = Optional.empty();
-	private String name;
 	private Binding binding;
 	private Optional<BindingMessage> input = Optional.empty();
 	private Optional<BindingMessage> output = Optional.empty();
 	private List<BindingMessage> faults = new ArrayList<>();
 	
 	BindingOperationImpl(NodeBuilder bindingOperationXml, Binding binding) {
+		super(bindingOperationXml, binding.getWsdl());
 		if (Wsdl.WSDL_NAMESPACE.equals(bindingOperationXml.getNamespace()) && OPERATION.equals(bindingOperationXml.getName())) {
-			this.binding = binding;
-			name = bindingOperationXml.getAttribute("name");		
+			this.binding = binding;		
 			NodeBuilder soapActionEl = bindingOperationXml.searchFirstByName("operation", "http://schemas.xmlsoap.org/wsdl/soap/");
 			NodeBuilder inputXml = bindingOperationXml.searchFirstByName("input");
 			NodeBuilder outputXml = bindingOperationXml.searchFirstByName("output");
@@ -45,12 +44,6 @@ public class BindingOperationImpl implements BindingOperation {
 			throw new IllegalArgumentException("Xml elements must be {"+Wsdl.WSDL_NAMESPACE+"}"+OPERATION + ", but it was {" + bindingOperationXml.getNamespace() + "}" + bindingOperationXml.getName());
 		}
 	}
-	
-	@Override
-	public String getName() { 
-		return name;
-	}
-
 	@Override
 	public Optional<BindingMessage> getInput() {
 		return input;

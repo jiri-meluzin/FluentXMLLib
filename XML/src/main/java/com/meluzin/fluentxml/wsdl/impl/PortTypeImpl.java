@@ -9,14 +9,14 @@ import com.meluzin.fluentxml.wsdl.Wsdl.Operation;
 import com.meluzin.fluentxml.wsdl.Wsdl.PortType;
 import com.meluzin.fluentxml.xml.builder.NodeBuilder;
 
-public class PortTypeImpl extends NamedEntityImpl implements PortType {
+public class PortTypeImpl extends NamedEntityImpl<PortType> implements PortType {
 	private static final String PORTTYPE = "portType";
 	private Collection<Operation> operations = new ArrayList<>();
 	
 	PortTypeImpl(NodeBuilder portTypeXml, Wsdl wsdl) {
-		super(portTypeXml.getAttribute("name"), wsdl);
+		super(portTypeXml, wsdl);
 		if (Wsdl.WSDL_NAMESPACE.equals(portTypeXml.getNamespace()) && PORTTYPE.equals(portTypeXml.getName())) {
-			operations = portTypeXml.search(false, n -> "operation".equals(n.getName())).map(n -> new OperationImpl(n)).collect(Collectors.toList());
+			operations = portTypeXml.search(false, n -> "operation".equals(n.getName())).map(n -> new OperationImpl(n, wsdl)).collect(Collectors.toList());
 		}
 		else {
 			throw new IllegalArgumentException("Xml elements must be {"+Wsdl.WSDL_NAMESPACE+"}"+PORTTYPE + ", but it was {" + portTypeXml.getNamespace() + "}" + portTypeXml.getName());

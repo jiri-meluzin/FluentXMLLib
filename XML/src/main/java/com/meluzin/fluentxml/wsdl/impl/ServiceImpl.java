@@ -9,15 +9,15 @@ import com.meluzin.fluentxml.wsdl.Wsdl.Port;
 import com.meluzin.fluentxml.wsdl.Wsdl.Service;
 import com.meluzin.fluentxml.xml.builder.NodeBuilder;
 
-public class ServiceImpl extends NamedEntityImpl implements Service {
+public class ServiceImpl extends NamedEntityImpl<Service> implements Service {
 	private static final String SERVICE = "service";
 	
 	private Collection<Port> ports = new ArrayList<>();
 	
 	ServiceImpl(NodeBuilder serviceXml, Wsdl wsdl) {
-		super(serviceXml.getAttribute("name"), wsdl);
+		super(serviceXml, wsdl);
 		if (Wsdl.WSDL_NAMESPACE.equals(serviceXml.getNamespace()) && SERVICE.equals(serviceXml.getName())) {
-			ports = serviceXml.search(false, n -> "port".equals(n.getName())).map(n -> new PortImpl(n)).collect(Collectors.toList());
+			ports = serviceXml.search(false, n -> "port".equals(n.getName())).map(n -> new PortImpl(n, wsdl)).collect(Collectors.toList());
 		}
 		else {
 			throw new IllegalArgumentException("Xml elements must be {"+Wsdl.WSDL_NAMESPACE+"}"+SERVICE + ", but it was {" + serviceXml.getNamespace() + "}" + serviceXml.getName());

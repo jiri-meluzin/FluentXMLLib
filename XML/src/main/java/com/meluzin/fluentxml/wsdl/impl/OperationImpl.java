@@ -11,17 +11,16 @@ import com.meluzin.fluentxml.wsdl.Wsdl.Operation;
 import com.meluzin.fluentxml.wsdl.Wsdl.Param;
 import com.meluzin.fluentxml.xml.builder.NodeBuilder;
 
-public class OperationImpl implements Operation {
+public class OperationImpl extends NamedEntityImpl<Operation> implements Operation {
 	private static final String OPERATION = "operation";
 
-	private String name;
 	private Optional<Param> input = Optional.empty();
 	private Optional<Param> output = Optional.empty();
 	private List<Param> faults = new ArrayList<>();
 	
-	OperationImpl(NodeBuilder operationXml) {
+	OperationImpl(NodeBuilder operationXml, Wsdl wsdl) {
+		super(operationXml, wsdl);
 		if (Wsdl.WSDL_NAMESPACE.equals(operationXml.getNamespace()) && OPERATION.equals(operationXml.getName())) {
-			name = operationXml.getAttribute("name");		
 			NodeBuilder inputXml = operationXml.searchFirstByName("input");
 			NodeBuilder outputXml = operationXml.searchFirstByName("output");
 			if (inputXml != null) {
@@ -37,11 +36,6 @@ public class OperationImpl implements Operation {
 		}
 	}
 	
-	@Override
-	public String getName() { 
-		return name;
-	}
-
 	@Override
 	public Optional<Param> getInput() {
 		return input;

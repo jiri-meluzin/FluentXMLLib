@@ -11,14 +11,14 @@ import com.meluzin.fluentxml.xml.builder.NodeBuilder;
 import com.meluzin.fluentxml.xml.builder.ReferenceInfoImpl;
 import com.meluzin.fluentxml.xml.xsd.XmlNode.ReferenceInfo;
 
-public class BindingImpl extends NamedEntityImpl implements Binding {
+public class BindingImpl extends NamedEntityImpl<Binding> implements Binding {
 	private static final String BINDING = "binding";
 	private ReferenceInfo type;
 	private Collection<BindingOperation> operations = new ArrayList<>();
 	
 	
 	BindingImpl(NodeBuilder bindingXml, Wsdl wsdl) {
-		super(bindingXml.getAttribute("name"), wsdl);
+		super(bindingXml, wsdl);
 		if (Wsdl.WSDL_NAMESPACE.equals(bindingXml.getNamespace()) && BINDING.equals(bindingXml.getName())) {
 			type = new ReferenceInfoImpl(bindingXml.getAttribute("type"), bindingXml);		
 

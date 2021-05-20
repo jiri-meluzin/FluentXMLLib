@@ -59,9 +59,13 @@ public class SchemaLoader {
 		} else {
 			System.err.println("Unsupported path: " + source);
 		}
+		try {
 		references.forEach(schemaReference -> {
 			resolve(schemaReference);
 		});
+		} catch (Exception ex) {
+			throw new RuntimeException("Cannot resolve " + source, ex);
+		}
 		
 		return getSchemaRepository();
 	}

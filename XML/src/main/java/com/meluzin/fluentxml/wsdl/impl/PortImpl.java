@@ -6,15 +6,14 @@ import com.meluzin.fluentxml.xml.builder.NodeBuilder;
 import com.meluzin.fluentxml.xml.builder.ReferenceInfoImpl;
 import com.meluzin.fluentxml.xml.xsd.XmlNode.ReferenceInfo;
 
-public class PortImpl implements Port {
+public class PortImpl extends NamedEntityImpl<Port> implements Port {
 	private static final String PORT = "port";
 
-	private String name;
 	private ReferenceInfo binding;
 	
-	PortImpl(NodeBuilder portXml) {
+	PortImpl(NodeBuilder portXml, Wsdl wsdl) {
+		super(portXml, wsdl);
 		if (Wsdl.WSDL_NAMESPACE.equals(portXml.getNamespace()) && PORT.equals(portXml.getName())) {
-			name = portXml.getAttribute("name");		
 			binding = new ReferenceInfoImpl(portXml.getAttribute("binding"), portXml);
 		}
 		else {
@@ -22,10 +21,6 @@ public class PortImpl implements Port {
 		}
 	}
 	
-	@Override
-	public String getName() { 
-		return name;
-	}
 
 	@Override
 	public ReferenceInfo getBinding() {

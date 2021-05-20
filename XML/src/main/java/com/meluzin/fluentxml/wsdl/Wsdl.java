@@ -18,12 +18,14 @@ public interface Wsdl extends BaseSchema {
 	public Collection<Service> getServices();
 	
 	
-	public interface NamedEntity {
-		public String getName();	
+	public interface NamedEntity<T extends NamedEntity<T>> {
+		public String getName();
+		public Optional<String> getDocumentation();
+		public T setDocumentation(Optional<String> documentation); 
 		public Wsdl getWsdl();	
 		public ReferenceInfo getReferenceInfo();
 	}
-	public interface Message extends NamedEntity, XmlNode<Message> {
+	public interface Message extends NamedEntity<Message>, XmlNode<Message> {
 		public Collection<Part> getParts();
 	}
 	public interface Part extends XmlNode<Part>  {
@@ -31,12 +33,11 @@ public interface Wsdl extends BaseSchema {
 		public Optional<ReferenceInfo> getElement();
 		public Optional<ReferenceInfo> getType();
 	}
-	public interface PortType extends NamedEntity {
+	public interface PortType extends NamedEntity<PortType> {
 		public Collection<Operation> getOperations();
 		
 	}
-	public interface Operation {
-		public String getName();
+	public interface Operation extends NamedEntity<Operation> {
 		public Optional<Param> getInput();
 		public Optional<Param> getOutput();
 		public Collection<Param> getFaults();
@@ -45,12 +46,11 @@ public interface Wsdl extends BaseSchema {
 		public Optional<String> getName();
 		public ReferenceInfo getMessage();		
 	}
-	public interface Binding extends NamedEntity {
+	public interface Binding extends NamedEntity<Binding> {
 		public ReferenceInfo getType();		
 		public Collection<BindingOperation> getOperations();
 	}
-	public interface BindingOperation {
-		public String getName();
+	public interface BindingOperation extends NamedEntity<BindingOperation> {
 		public Binding getBinding();
 		public Optional<String> getSoapAction();
 		public Optional<BindingMessage> getInput();
@@ -68,11 +68,10 @@ public interface Wsdl extends BaseSchema {
 		Output,
 		Fault
 	}
-	public interface Service extends NamedEntity {
+	public interface Service extends NamedEntity<Service> {
 		public Collection<Port> getPorts();
 	}
-	public interface Port {
-		public String getName();
+	public interface Port extends NamedEntity<Port> {
 		public ReferenceInfo getBinding();		
 	}
 }
