@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
+import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
@@ -43,6 +44,7 @@ public class Log {
 		 Log.get().severe("started");
 		 Log.get().severe("finished");
 		 Log.get().info("finished");
+		 Log.get().fine("abc");
 	}
 	private static List<Handler> handlers = new ArrayList<>();
 	static {
@@ -76,6 +78,7 @@ public class Log {
 	  public SystemOutHandler() {
 	   // setOutputStream(System.out);
 	    setFormatter(formatter);
+	    setLevel(Level.FINE);
 	  }
 	  @Override
 		public void publish(LogRecord record) {
