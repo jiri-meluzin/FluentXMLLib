@@ -28,7 +28,16 @@ public class T {
 	public static <A, B, C, D, E> V5<A, B, C, D, E> copyAndAdd(V4<A, B, C, D> v, E e) {
 		return new V5<A, B, C, D, E>(v.getA(), v.getB(), v.getC(), v.getD(), e);
 	}
-	public static class V1<A> {
+	@SuppressWarnings("unchecked")
+	public static <A> int compareProp(A a, A oa) {
+		if (a == oa) return 0;
+		if (a == null) return 1;
+		if (oa == null) return -1;
+		if (a instanceof Comparable<?> && oa instanceof Comparable<?>) {
+			return ((Comparable<A>)a).compareTo(oa);
+		} else return a.toString().compareTo(oa.toString());
+	}
+	public static class V1<A> implements Comparable<Object> {
 		private A a;
 		public V1(A a) {
 			this.a = a;
@@ -50,6 +59,20 @@ public class T {
 			int result = 1;
 			result = prime * result + ((a == null) ? 0 : a.hashCode());
 			return result;
+		}
+		@SuppressWarnings("unchecked")
+		@Override
+		public int compareTo(Object o) {
+			if (o == null) return -1;
+			V1<A> oa;
+			if (!(o instanceof V1<?>)) {
+				return toString().compareTo(o.toString());
+			} else {
+				oa = (V1<A>)o;
+			}
+			int comparePropA = compareProp(getA(), oa.getA());
+			if (comparePropA != 0) return comparePropA;
+			return 0;
 		}
 		@Override
 		public boolean equals(Object obj) {
@@ -116,6 +139,22 @@ public class T {
 				return false;
 			return true;
 		}	
+		@SuppressWarnings("unchecked")
+		@Override
+		public int compareTo(Object o) {
+			if (o == null) return -1;
+			V2<A,B> oa;
+			if (!(o instanceof V2<?,?>)) {
+				return toString().compareTo(o.toString());
+			} else {
+				oa = (V2<A,B>)o;
+			}
+			int comparePropA = compareProp(getA(), oa.getA());
+			if (comparePropA != 0) return comparePropA;
+			int comparePropB = compareProp(getB(), oa.getB());
+			if (comparePropB != 0) return comparePropB;
+			return 0;
+		}
 		
 	}
 	public static class V3<A, B, C> extends V2<A, B>{
@@ -167,6 +206,24 @@ public class T {
 			} else if (!c.equals(other.c))
 				return false;
 			return true;
+		}
+		@SuppressWarnings("unchecked")
+		@Override
+		public int compareTo(Object o) {
+			if (o == null) return -1;
+			V3<A,B,C> oa;
+			if (!(o instanceof V3<?,?,?>)) {
+				return toString().compareTo(o.toString());
+			} else {
+				oa = (V3<A,B,C>)o;
+			}
+			int comparePropA = compareProp(getA(), oa.getA());
+			if (comparePropA != 0) return comparePropA;
+			int comparePropB = compareProp(getB(), oa.getB());
+			if (comparePropB != 0) return comparePropB;
+			int comparePropC = compareProp(getC(), oa.getC());
+			if (comparePropC != 0) return comparePropC;
+			return 0;
 		}
 		
 	}
@@ -224,6 +281,26 @@ public class T {
 			} else if (!d.equals(other.d))
 				return false;
 			return true;
+		}
+		@SuppressWarnings("unchecked")
+		@Override
+		public int compareTo(Object o) {
+			if (o == null) return -1;
+			V4<A,B,C,D> oa;
+			if (!(o instanceof V4<?,?,?,?>)) {
+				return toString().compareTo(o.toString());
+			} else {
+				oa = (V4<A,B,C,D>)o;
+			}
+			int comparePropA = compareProp(getA(), oa.getA());
+			if (comparePropA != 0) return comparePropA;
+			int comparePropB = compareProp(getB(), oa.getB());
+			if (comparePropB != 0) return comparePropB;
+			int comparePropC = compareProp(getC(), oa.getC());
+			if (comparePropC != 0) return comparePropC;
+			int comparePropD = compareProp(getD(), oa.getD());
+			if (comparePropD != 0) return comparePropD;
+			return 0;
 		}
 	}
 	public static class V5<A, B, C, D, E> extends V4<A, B, C, D>{
@@ -285,6 +362,28 @@ public class T {
 			} else if (!e.equals(other.e))
 				return false;
 			return true;
+		}
+		@SuppressWarnings("unchecked")
+		@Override
+		public int compareTo(Object o) {
+			if (o == null) return -1;
+			V5<A,B,C,D,E> oa;
+			if (!(o instanceof V5<?,?,?,?,?>)) {
+				return toString().compareTo(o.toString());
+			} else {
+				oa = (V5<A,B,C,D,E>)o;
+			}
+			int comparePropA = compareProp(getA(), oa.getA());
+			if (comparePropA != 0) return comparePropA;
+			int comparePropB = compareProp(getB(), oa.getB());
+			if (comparePropB != 0) return comparePropB;
+			int comparePropC = compareProp(getC(), oa.getC());
+			if (comparePropC != 0) return comparePropC;
+			int comparePropD = compareProp(getD(), oa.getD());
+			if (comparePropD != 0) return comparePropD;
+			int comparePropE = compareProp(getE(), oa.getE());
+			if (comparePropE != 0) return comparePropE;
+			return 0;
 		}
 	}
 }

@@ -4,11 +4,13 @@ import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ForkJoinPool;
 import java.util.function.Predicate;
 
+import com.meluzin.functional.FileSearcher;
 import com.meluzin.functional.T;
 import com.meluzin.functional.T.V2;
 
@@ -111,23 +113,30 @@ public class FileStreamIterator implements Iterator<Path> {
 		queue.add(T.V(null, throwable));
 		FileStreamIterator.this.notifyAll();
 	}
-	public boolean isFinished() {
+	public synchronized boolean isFinished() {
 		return finished;
 	}
 	public synchronized void setFinished(boolean finished) {
 		this.finished = finished;
 		FileStreamIterator.this.notifyAll();
 	}
+	
+	private synchronized boolean isQueueEmpty() {
+		return queue.isEmpty();
+	}
+	
 	@Override
-	public synchronized boolean hasNext() {
-		if (!finished && queue.isEmpty()) {
-			try {
-				FileStreamIterator.this.wait();
-			} catch (InterruptedException e) {
-				throw new RuntimeException("Wait interrupted", e);
+	public boolean hasNext() {
+		while (!isFinished() && isQueueEmpty()) {
+			synchronized (this) {
+				try {
+					FileStreamIterator.this.wait();
+				} catch (InterruptedException e) {
+					throw new RuntimeException("Wait interrupted", e);
+				}
 			}
 		}
-		return !queue.isEmpty() || !finished;
+		return !isQueueEmpty();
 	}
 
 	@Override
@@ -137,5 +146,9 @@ public class FileStreamIterator implements Iterator<Path> {
 		return poll.getA();
 	}
 
-	
+	public static void main(String[] args) {
+		new FileSearcher().iterateFiles(Paths.get("e:/"), "glob:**/*", true).parallel().forEach(p ->{
+			if (p.getNameCount()==3) System.out.println(p);
+		});
+	}
 }
