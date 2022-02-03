@@ -4,6 +4,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -62,6 +63,12 @@ public interface NodeBuilder {
 	 */
 	public NodeBuilder addChild(String name, boolean parentPrefix);
 	public NodeBuilder addChild(AddChildAction action);
+	public default NodeBuilder addChildOnlyIf(BooleanSupplier condition, AddChildAction action) {
+		return addChildOnlyIf(condition.getAsBoolean(), action);
+	}
+	public default NodeBuilder addChildOnlyIf(boolean condition, AddChildAction action) {
+		return  condition ? addChild(action) : this;
+	}
 	public default NodeBuilder addChild(AddChildActionReturn action) {
 		return action.exec(this);
 	}
