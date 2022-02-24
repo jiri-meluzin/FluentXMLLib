@@ -9,13 +9,17 @@ import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ForkJoinPool;
 import java.util.function.Predicate;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.meluzin.functional.FileSearcher;
+import com.meluzin.functional.Log;
 import com.meluzin.functional.T;
 import com.meluzin.functional.T.V2;
 
 
 public class FileStreamIterator implements Iterator<Path> {
+	private static Logger log = Log.get();
 	private boolean finished = false;
 	private volatile int processing = 0;
 	private Predicate<Path> fileMatcher = p -> true;
@@ -32,6 +36,7 @@ public class FileStreamIterator implements Iterator<Path> {
 			try {
 				searchDir(start, commonPool);
 			} catch (Exception ex) {
+				log.log(Level.SEVERE, "Could not search files in " + start, ex);
 				insertThrowable(ex);
 			}
 		});
@@ -84,6 +89,7 @@ public class FileStreamIterator implements Iterator<Path> {
 			decrease();
 			onFinished(commonPool);
 		} catch (IOException e) {
+			log.log(Level.SEVERE, "Could not read files in " + bwSourcePath, e);
 			throw new RuntimeException("Could not read files in " + bwSourcePath, e);
 		}
 	}
@@ -142,12 +148,15 @@ public class FileStreamIterator implements Iterator<Path> {
 	@Override
 	public Path next() {
 		V2<Path, Throwable> poll = queue.poll();
-		if (poll.getB() != null) throw new RuntimeException("Could not finish searching", poll.getB());
+		if (poll.getB() != null) {
+			log.log(Level.SEVERE, "A error occured while iterating files", poll.getB());
+			throw new RuntimeException("Could not finish searching", poll.getB());
+		}
 		return poll.getA();
 	}
 
 	public static void main(String[] args) {
-		new FileSearcher().iterateFiles(Paths.get("e:/"), "glob:**/*", true).parallel().forEach(p ->{
+		FileStreamIterable.searchFiles(Paths.get(args[0]), "glob:**/*", true, true).forEach(p ->{
 			if (p.getNameCount()==3) System.out.println(p);
 		});
 	}
