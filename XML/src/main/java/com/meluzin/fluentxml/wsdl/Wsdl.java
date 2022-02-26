@@ -1,6 +1,7 @@
 package com.meluzin.fluentxml.wsdl;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 import com.meluzin.fluentxml.xml.builder.BaseSchema;
@@ -24,6 +25,7 @@ public interface Wsdl extends BaseSchema {
 		public T setDocumentation(Optional<String> documentation); 
 		public Wsdl getWsdl();	
 		public ReferenceInfo getReferenceInfo();
+		public List<Object> getOtherFields();
 	}
 	public interface Message extends NamedEntity<Message>, XmlNode<Message> {
 		public Collection<Part> getParts();
@@ -62,6 +64,7 @@ public interface Wsdl extends BaseSchema {
 		public Optional<String> getName();
 		public BindingOperation getBindingOperation();
 		public MessageType getMessageType();
+		public List<Object> getOtherFields();
 	}
 	public enum MessageType {
 		Input,

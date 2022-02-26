@@ -31,7 +31,7 @@ public class FileStreamIterator implements Iterator<Path> {
 		this.parallel = parallel;
 		this.fileMatcher = fileMatcher;
 		this.recursive = recursive;
-		ForkJoinPool commonPool = ForkJoinPool.commonPool();
+		ForkJoinPool commonPool = ForkJoinPool.commonPool();		
 		commonPool.submit(() -> {
 			try {
 				searchDir(start, commonPool);
@@ -76,7 +76,13 @@ public class FileStreamIterator implements Iterator<Path> {
 					if (Files.isDirectory(f) && isRecursive()) {
 						increase();
 						if (isParallel()) {
-							commonPool.submit(() -> processSubdir(commonPool, f));
+							commonPool.submit(() -> {
+								try {
+									processSubdir(commonPool, f);
+								} catch (Exception e) {
+									insertThrowable(e);
+								}
+							});
 						} else {
 							processSubdir(commonPool, f);
 						}
