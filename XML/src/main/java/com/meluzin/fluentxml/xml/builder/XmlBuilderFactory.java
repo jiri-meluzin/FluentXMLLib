@@ -64,7 +64,7 @@ public class XmlBuilderFactory {
 		Document document;
 		docFactory = DocumentBuilderFactory.newInstance();
 		docFactory.setNamespaceAware(true);
-		docFactory.setIgnoringElementContentWhitespace(false);
+		docFactory.setIgnoringElementContentWhitespace(true);
 		try {			
 			docBuilder = docFactory.newDocumentBuilder();
 			document = docBuilder.newDocument();
