@@ -116,9 +116,22 @@ public class FileStreamIterator implements Iterator<Path> {
 		decrease();
 		onFinished(commonPool);
 	}
-	public synchronized void insertPath(Path path) {
-		queue.add(T.V(path, null));
-		FileStreamIterator.this.notifyAll();
+	public void insertPath(Path path) {
+		while (queue.size() > 300) {
+			synchronized (this) {
+				FileStreamIterator.this.notifyAll();	
+			}
+			synchronized (this) {
+				try {
+					FileStreamIterator.this.wait(10);
+				} catch (InterruptedException e) {
+				}
+			}
+		}
+		synchronized (this) {
+			queue.add(T.V(path, null));
+			FileStreamIterator.this.notifyAll();	
+		}
 	}
 	public synchronized void insertThrowable(Throwable throwable) {
 		setError(true);

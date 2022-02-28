@@ -29,79 +29,14 @@ import com.meluzin.ioutils.FileStreamIterator;
 public class FileSearcher {
 
 	public List<Path> searchFiles(Path path, String filePattern, boolean recursive) {
-		return StreamSupport.stream(FileStreamIterable.searchFiles(path, filePattern, true, recursive).spliterator(), false).collect(Collectors.toList());
+		return iterateFiles(path, filePattern, recursive).collect(Collectors.toList());
 	}
 	public Stream<Path> iterateFiles(Path path, String filePattern, boolean recursive) {
-		PathMatcher matcher = FileSystems.getDefault().getPathMatcher(filePattern);
-	    return asStream(new FilesIterator(path, recursive)).filter(p -> matcher.matches(p));
+	    return StreamSupport.stream(FileStreamIterable.searchFiles(path, filePattern, true, recursive).spliterator(), false);
 	}
 	public Stream<Path> iterateFiles(Path path, String filePattern, String excludeFilePattern, boolean recursive) {
 		PathMatcher excludeMatcher = FileSystems.getDefault().getPathMatcher(excludeFilePattern);
 	    return iterateFiles(path, filePattern, recursive).filter(p -> !excludeMatcher.matches(p));
-	}
-	public class FilesIterator implements Iterator<Path> {
-    	Deque<Path> stack = new ArrayDeque<Path>();
-    	Iterator<Path> iterator;
-    	boolean recursive;
-    	Path currentPath;
-    	DirectoryStream<Path> files; 
-		public FilesIterator(Path root, boolean recursive) {
-			this.recursive = recursive;
-			initStream(root);
-		}
-		private void initStream(Path path) {
-			try {
-				if (files != null) {
-					try {
-						files.close();
-					} catch (IOException e) {
-						throw new RuntimeException("Cannot close files reader", e);
-					}
-					files = null;
-				}
-				files = Files.newDirectoryStream(path);
-				iterator = files.iterator();
-				currentPath = path;
-			} catch (IOException e) {
-				throw new RuntimeException("Cannot iterate files", e);
-			}
-		}
-		@Override
-		public boolean hasNext() {
-			if (iterator.hasNext()) return true;
-			else if (recursive) {
-				try {
-					DirectoryStream<Path> dirs = Files.newDirectoryStream(currentPath);
-					try {
-						asStream(dirs.iterator()).filter(p -> p.toFile().isDirectory()).forEach(p -> stack.addLast(p));
-					} finally {
-						dirs.close();
-					}
-					
-				} catch (IOException e) {
-					throw new RuntimeException("Cannot read sub dirs", e);
-				}
-				while (!stack.isEmpty()) {
-					initStream(stack.removeFirst());
-					if (iterator.hasNext()) return true;
-				}
-			}
-			if (files != null) {
-				try {
-					files.close();
-				} catch (IOException e) {
-					throw new RuntimeException("Cannot close files reader", e);
-				}
-				files = null;
-			}
-			return false;
-		}
-
-		@Override
-		public Path next() {
-			return iterator.next();
-		}
-		
 	}
 	@SuppressWarnings("hiding")
     public static <T> Stream<T> asStream(Iterator<T> sourceIterator) {
