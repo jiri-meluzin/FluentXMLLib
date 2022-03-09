@@ -30,8 +30,7 @@ public class StreamUtils {
 		} catch (IOException e) {
 			throw new RuntimeException("Cannot convert stream to string", e);
 		}
-		String ret = sb.toString();
-		return ret.length() == 0 ? null : ret;
+		return sb.toString();
 	}
 	public static String convertStreamToString(BufferedReader is)  {
 		if (is == null) return null;
@@ -45,8 +44,7 @@ public class StreamUtils {
 			log.severe("Cannot convert stream to string (read until now: " + sb + ")");
 			throw new RuntimeException("Cannot convert stream to string", e);
 		}
-		String ret = sb.toString();
-		return ret.length() == 0 ? null : ret;
+		return sb.toString();
 	}
 	
 	public static InputStream readFile(Path path) {
