@@ -103,7 +103,9 @@ public class FileStreamIterator implements Iterator<Path> {
 		return parallel;
 	}
 	private void onFinished(ForkJoinPool commonPool) {
-		if (getProcessing() == 0)
+		int processing2 = getProcessing();
+		if (processing < 0) log.severe("Processing is bellow 0");
+		if (processing2 == 0)
 		setFinished(true);
 		//if (isParallel() && getProcessing() == 0) commonPool.shutdown();
 	}
@@ -134,6 +136,7 @@ public class FileStreamIterator implements Iterator<Path> {
 		}
 	}
 	public synchronized void insertThrowable(Throwable throwable) {
+		throwable.printStackTrace();
 		setError(true);
 		queue.add(T.V(null, throwable));
 		FileStreamIterator.this.notifyAll();
@@ -154,10 +157,12 @@ public class FileStreamIterator implements Iterator<Path> {
 	public boolean hasNext() {
 		while (!isFinished() && isQueueEmpty()) {
 			synchronized (this) {
-				try {
-					FileStreamIterator.this.wait();
-				} catch (InterruptedException e) {
-					throw new RuntimeException("Wait interrupted", e);
+				if (!isFinished() && isQueueEmpty()) {
+					try {
+						FileStreamIterator.this.wait();
+					} catch (InterruptedException e) {
+						throw new RuntimeException("Wait interrupted", e);
+					}
 				}
 			}
 		}
@@ -175,8 +180,11 @@ public class FileStreamIterator implements Iterator<Path> {
 	}
 
 	public static void main(String[] args) {
-		FileStreamIterable.searchFiles(Paths.get(args[0]), "glob:**/*", true, true).forEach(p ->{
-			if (p.getNameCount()==3) System.out.println(p);
-		});
+		int count = 0;
+		while (true) {
+			FileStreamIterable.searchFiles(Paths.get(args[0]), "glob:**/*", true, true).forEach(p ->{
+			});
+			System.out.println(count++);
+		}
 	}
 }
