@@ -11,6 +11,7 @@ import java.util.logging.ConsoleHandler;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.Level;
+import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
@@ -51,10 +52,18 @@ public class Log {
 		//Logger.getGlobal().setLevel(Level.FINEST);
 		//Logger.getGlobal().addHandler(new SystemOutHandler());
 		if (System.getProperty("java.util.logging.config.file") == null) {
-		      String path = Log.class.getResource("logging.properties")
-                    .getFile();
-			System.setProperty("java.util.logging.config.file", path);
-		}
+			//System.setProperty("java.util.logging.config.file", path);
+			String level = System.getProperty("log.level", "info");
+		      try
+		      {
+		          LogManager.getLogManager().readConfiguration(Log.class.getResourceAsStream("logging."+level+".properties"));
+		      }
+		      catch (final IOException e)
+		      {
+		          Logger.getAnonymousLogger().severe("Could not load default logging.properties file");
+		          Logger.getAnonymousLogger().severe(e.getMessage());
+		      }
+		} else System.out.println("java.util.logging.config.file="+System.getProperty("java.util.logging.config.file"));
 		handlers.add(new SystemOutHandler());
 	}
 	public static void addHandler(Handler handler) {
