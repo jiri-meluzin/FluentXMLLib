@@ -32,7 +32,10 @@ public class FileSearcher {
 		return iterateFiles(path, filePattern, recursive).collect(Collectors.toList());
 	}
 	public Stream<Path> iterateFiles(Path path, String filePattern, boolean recursive) {
-	    return StreamSupport.stream(FileStreamIterable.searchFiles(path, filePattern, true, recursive).spliterator(), false);
+		return iterateFiles(path, filePattern, false, recursive);
+	}
+	public Stream<Path> iterateFiles(Path path, String filePattern, boolean parallel, boolean recursive) {
+	    return StreamSupport.stream(FileStreamIterable.searchFiles(path, filePattern, parallel, recursive).spliterator(), parallel);
 	}
 	public Stream<Path> iterateFiles(Path path, String filePattern, String excludeFilePattern, boolean recursive) {
 		PathMatcher excludeMatcher = FileSystems.getDefault().getPathMatcher(excludeFilePattern);

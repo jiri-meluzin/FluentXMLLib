@@ -5,6 +5,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ForkJoinPool;
@@ -15,6 +16,7 @@ import java.util.logging.Logger;
 import com.meluzin.functional.FileSearcher;
 import com.meluzin.functional.Log;
 import com.meluzin.functional.T;
+import com.meluzin.functional.T.V1;
 import com.meluzin.functional.T.V2;
 
 
@@ -26,20 +28,26 @@ public class FileStreamIterator implements Iterator<Path> {
 	private boolean parallel = true;
 	private boolean recursive = true;
 	private boolean error = false;
-	private ConcurrentLinkedQueue<T.V2<Path, Throwable>> queue = new ConcurrentLinkedQueue<>();
+	private ForkJoinPool commonPool;
+	private ConcurrentLinkedQueue<T.V2<Path, Throwable>> foundFiles = new ConcurrentLinkedQueue<>();
+	private ConcurrentLinkedQueue<Path> dirsToProcess = new ConcurrentLinkedQueue<>();
 	public FileStreamIterator(Path start, boolean parallel, Predicate<Path> fileMatcher, boolean recursive) {
 		this.parallel = parallel;
 		this.fileMatcher = fileMatcher;
 		this.recursive = recursive;
-		ForkJoinPool commonPool = ForkJoinPool.commonPool();		
-		commonPool.submit(() -> {
-			try {
-				searchDir(start, commonPool);
-			} catch (Exception ex) {
-				log.log(Level.SEVERE, "Could not search files in " + start, ex);
-				insertThrowable(ex);
-			}
-		});
+		if (parallel) {
+			commonPool = new ForkJoinPool();		
+			commonPool.submit(() -> {
+				try {
+					searchDir(start, commonPool);
+				} catch (Exception ex) {
+					log.log(Level.SEVERE, "Could not search files in " + start, ex);
+					insertThrowable(ex);
+				}
+			});
+		} else {
+			searchDir(start, null);
+		}
 		
 	}
 	public boolean isError() {
@@ -64,7 +72,7 @@ public class FileStreamIterator implements Iterator<Path> {
 	private void searchDir(Path bwSourcePath, ForkJoinPool commonPool )  {
 		try {
 			if (isError()) {
-				onFinished(commonPool);
+				onFinished();
 				return;
 			}
 			increase();
@@ -84,7 +92,11 @@ public class FileStreamIterator implements Iterator<Path> {
 								}
 							});
 						} else {
-							processSubdir(commonPool, f);
+							if (foundFiles.size() > 300) {
+								dirsToProcess.add(f);
+							} else {
+								processSubdir(commonPool, f);
+							}
 						}
 					}
 					if (fileMatcher.test(f)) {
@@ -93,7 +105,7 @@ public class FileStreamIterator implements Iterator<Path> {
 				});
 			}
 			decrease();
-			onFinished(commonPool);
+			onFinished();
 		} catch (IOException e) {
 			log.log(Level.SEVERE, "Could not read files in " + bwSourcePath, e);
 			throw new RuntimeException("Could not read files in " + bwSourcePath, e);
@@ -102,7 +114,7 @@ public class FileStreamIterator implements Iterator<Path> {
 	public boolean isParallel() {
 		return parallel;
 	}
-	private void onFinished(ForkJoinPool commonPool) {
+	private void onFinished() {
 		int processing2 = getProcessing();
 		if (processing < 0) log.severe("Processing is bellow 0");
 		if (processing2 == 0)
@@ -116,29 +128,31 @@ public class FileStreamIterator implements Iterator<Path> {
 			insertThrowable(e);
 		}
 		decrease();
-		onFinished(commonPool);
+		onFinished();
 	}
 	public void insertPath(Path path) {
-		while (queue.size() > 300) {
-			synchronized (this) {
-				FileStreamIterator.this.notifyAll();	
-			}
-			synchronized (this) {
-				try {
-					FileStreamIterator.this.wait(10);
-				} catch (InterruptedException e) {
+		if (isParallel()) {
+			while (foundFiles.size() > 300) {
+				synchronized (this) {
+					FileStreamIterator.this.notifyAll();	
+				}
+				synchronized (this) {
+					try {
+						FileStreamIterator.this.wait(10);
+					} catch (InterruptedException e) {
+					}
 				}
 			}
 		}
 		synchronized (this) {
-			queue.add(T.V(path, null));
+			foundFiles.add(T.V(path, null));
 			FileStreamIterator.this.notifyAll();	
 		}
 	}
 	public synchronized void insertThrowable(Throwable throwable) {
 		throwable.printStackTrace();
 		setError(true);
-		queue.add(T.V(null, throwable));
+		foundFiles.add(T.V(null, throwable));
 		FileStreamIterator.this.notifyAll();
 	}
 	public synchronized boolean isFinished() {
@@ -147,23 +161,30 @@ public class FileStreamIterator implements Iterator<Path> {
 	public synchronized void setFinished(boolean finished) {
 		this.finished = finished;
 		FileStreamIterator.this.notifyAll();
+		if (finished && this.commonPool!=null) this.commonPool.shutdown();
 	}
 	
 	private synchronized boolean isQueueEmpty() {
-		return queue.isEmpty();
+		return foundFiles.isEmpty();
 	}
 	
 	@Override
 	public boolean hasNext() {
-		while (!isFinished() && isQueueEmpty()) {
-			synchronized (this) {
-				if (!isFinished() && isQueueEmpty()) {
-					try {
-						FileStreamIterator.this.wait();
-					} catch (InterruptedException e) {
-						throw new RuntimeException("Wait interrupted", e);
+		if (isParallel()) {
+			while (!isFinished() && isQueueEmpty()) {
+				synchronized (this) {
+					if (!isFinished() && isQueueEmpty()) {
+						try {
+							FileStreamIterator.this.wait();
+						} catch (InterruptedException e) {
+							throw new RuntimeException("Wait interrupted", e);
+						}
 					}
 				}
+			}
+		} else {
+			while (isQueueEmpty() && dirsToProcess.size() > 0)  {
+				processSubdir(null, dirsToProcess.poll());
 			}
 		}
 		return !isQueueEmpty();
@@ -171,7 +192,7 @@ public class FileStreamIterator implements Iterator<Path> {
 
 	@Override
 	public Path next() {
-		V2<Path, Throwable> poll = queue.poll();
+		V2<Path, Throwable> poll = foundFiles.poll();
 		if (poll.getB() != null) {
 			log.log(Level.SEVERE, "A error occured while iterating files", poll.getB());
 			throw new RuntimeException("Could not finish searching", poll.getB());
@@ -182,9 +203,14 @@ public class FileStreamIterator implements Iterator<Path> {
 	public static void main(String[] args) {
 		int count = 0;
 		while (true) {
-			FileStreamIterable.searchFiles(Paths.get(args[0]), "glob:**/*", true, true).forEach(p ->{
+			V1<Integer> v = T.V(0);
+			Instant now = Instant.now();
+			new FileSearcher().iterateFiles(Paths.get(args[0]), "glob:**/*", true, true).forEach(p ->{
+				v.setA(v.getA()+1);
 			});
-			System.out.println(count++);
+			Instant minusMillis = now.minusMillis(Instant.now().toEpochMilli());
+			System.out.println(minusMillis);
+			System.out.println(v.getA());
 		}
 	}
 }
