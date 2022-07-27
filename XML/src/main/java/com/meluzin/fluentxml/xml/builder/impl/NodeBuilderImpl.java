@@ -26,6 +26,8 @@ import com.meluzin.functional.BaseRecursiveIterator;
 import com.meluzin.functional.ChildrenAccessor;
 import com.meluzin.functional.Log;
 import com.meluzin.functional.T;
+import com.meluzin.functional.T.V2;
+import com.meluzin.functional.T.V3;
 
 public class NodeBuilderImpl implements NodeBuilder {
 	private Map<String, String> processingInstructions = new HashMap<>();
@@ -669,11 +671,24 @@ public class NodeBuilderImpl implements NodeBuilder {
 		if (prefixedAttributes == null) {
 			if (other.prefixedAttributes != null)
 				return false;
-		} else if (!prefixedAttributes.equals(other.prefixedAttributes))
-			return false;
+		} else if (!prefixedAttributes.equals(other.prefixedAttributes)) {
+			if (other.prefixedAttributes == null) return false;
+			Optional<V2<V3<String, String, String>, String>> found = prefixedAttributes.entrySet().stream().
+					map(a -> a.getValue().entrySet().stream().map(e -> T.V(a.getKey(), e.getKey(), e.getValue()))).
+					flatMap(s -> s).
+					filter(s -> s.getC() != null).
+					filter(s -> !s.getC().equals(getOtherAttributeValue(other, s))).
+					map(s -> T.V(s, getOtherAttributeValue(other, s))).
+					findFirst();
+			if (found.isPresent())
+				return false;
+		}
 		if (textNode != other.textNode)
 			return false;
 		return true;
+	}
+	protected String getOtherAttributeValue(NodeBuilderImpl other, V3<String, String, String> thisAttributeWithValue) {
+		return other.prefixedAttributes.getOrDefault(thisAttributeWithValue.getA(), new HashMap<>()).get(thisAttributeWithValue.getB());
 	}
 	private boolean isChildrenListEqual(NodeBuilderImpl other) {
 		if (children == other.children) return true;
