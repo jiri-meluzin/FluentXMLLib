@@ -249,4 +249,13 @@ public class TestNodeBuilderImpl {
 		String string = element.toString();
 		assertThat(string, containsString("xml:lang=\"en\""));
 	}
+	@Test
+	public void testEmptyText() {
+		XmlBuilderFactory fac = new XmlBuilderFactory();
+		NodeBuilder element = fac.createRootElement("element").addAttribute("xml","lang", "en").addChild("x").setTextContent(null).getRoot();
+		NodeBuilder element2 = fac.createRootElement("element").addAttribute("xml","lang", "en").addChild("x").setTextContent("").getRoot();
+		assertThat(element2.getFirstDiff(element), is(Optional.empty()));
+		assertThat(element.getFirstDiff(element2), is(Optional.empty()));
+		assertThat(element2.equalsTo(element), is(true));
+	}
 }

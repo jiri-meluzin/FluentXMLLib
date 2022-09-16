@@ -154,6 +154,18 @@ public interface NodeBuilder {
 	public NodeBuilder searchFirstByName(boolean recursive, String name);
 	public NodeBuilder searchFirstByName(boolean recursive, String name, String namespace);
 	public NodeBuilder searchFirst(boolean recursive, NodePredicate criterium);
+	default public Optional<String> getTextOfFirst(String name) {
+		return getTextOfFirst(false, name);
+	};
+	default public Optional<String> getTextOfFirst(boolean recursive, String name) {
+		return search(recursive, name).findFirst().map(s -> s.getTextContent());
+	};
+	default public Optional<String> getTextOfFirstAttribute(String name, String attributeName) {
+		return getTextOfFirstAttribute(false, name, attributeName);
+	};
+	default public Optional<String> getTextOfFirstAttribute(boolean recursive, String name, String attributeName) {
+		return search(recursive, name).findFirst().map(s -> s.getAttribute(attributeName));
+	};
 	public boolean hasChild(NodePredicate criterium);
 	public boolean hasChild(boolean recursive, NodePredicate criterium);
 	public XmlBuilderFactory getXmlBuilderFactory();
