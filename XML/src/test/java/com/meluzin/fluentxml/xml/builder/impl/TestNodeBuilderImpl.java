@@ -228,6 +228,12 @@ public class TestNodeBuilderImpl {
 		Assert.assertTrue(n1.equalsTo(n2));	
 		Optional<String> firstDiff = n1.getFirstDiff(n2);
 		Assert.assertTrue(!firstDiff.isPresent());
+
+		n1.addAttribute("a", (String)null);
+		n2.addAttribute("a", (String)null);
+		Assert.assertTrue(!n1.equals(n2));
+		Assert.assertTrue(n1.equalsTo(n2));
+		Assert.assertTrue(!n1.getFirstDiff(n2).isPresent());
 		
 	}
 	@Test 
@@ -235,10 +241,21 @@ public class TestNodeBuilderImpl {
 		NodeBuilder n1 = getFactory().createRootElement("x").addAttribute("a", "b");
 		NodeBuilder n2 = getFactory().createRootElement("x").addAttribute("c", "b");
 
-		Assert.assertTrue(!n1.equals(n2));		
-		Assert.assertTrue(!n1.equalsTo(n2));	
+		Assert.assertTrue(!n1.equals(n2));
+		Assert.assertTrue(!n1.equalsTo(n2));
 		Optional<String> firstDiff = n1.getFirstDiff(n2);
 		Assert.assertTrue(firstDiff.isPresent());
+
+		n1.addAttribute("c", "b");
+		Assert.assertTrue(!n1.equals(n2));
+		Assert.assertTrue(!n1.equalsTo(n2));
+		Assert.assertTrue(n1.getFirstDiff(n2).isPresent());
+		
+		n1.addAttribute("a", (String)null);
+		n2.addAttribute("a", "a");
+		Assert.assertTrue(!n1.equals(n2));
+		Assert.assertTrue(!n1.equalsTo(n2));
+		Assert.assertTrue(n1.getFirstDiff(n2).isPresent());
 		
 	}
 	@Test 

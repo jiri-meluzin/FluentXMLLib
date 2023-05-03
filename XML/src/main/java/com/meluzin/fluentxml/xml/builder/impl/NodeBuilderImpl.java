@@ -682,6 +682,15 @@ public class NodeBuilderImpl implements NodeBuilder {
 					findFirst();
 			if (found.isPresent())
 				return false;
+			Optional<V2<V3<String, String, String>, String>> foundOther = other.prefixedAttributes.entrySet().stream().
+					map(a -> a.getValue().entrySet().stream().map(e -> T.V(a.getKey(), e.getKey(), e.getValue()))).
+					flatMap(s -> s).
+					filter(s -> s.getC() != null).
+					filter(s -> !s.getC().equals(getOtherAttributeValue(this, s))).
+					map(s -> T.V(s, getOtherAttributeValue(this, s))).
+					findFirst();
+			if (foundOther.isPresent())
+				return false;
 		}
 		if (textNode != other.textNode)
 			return false;

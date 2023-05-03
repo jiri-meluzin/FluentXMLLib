@@ -53,21 +53,29 @@ public class Log {
 
 	private static List<Handler> handlers = new ArrayList<>();
 	static {
-		if (System.getProperty("java.util.logging.config.file") == null) {
+		if (isLoggingConfigFileAvailable()) {
 			String levelPropertyValue = System.getProperty("log.level", "info");
-			String level = Arrays.
-					asList("debug", "info", "warning").stream().
-					filter(l -> levelPropertyValue.equals(l)).
-					findAny().
-					orElse("info");
-			try {
-				LogManager.getLogManager().readConfiguration(Log.class.getResourceAsStream("logging." + level + ".properties"));
-			} catch (final IOException e) {
-				Logger.getAnonymousLogger().severe("Could not load default logging.properties file");
-				Logger.getAnonymousLogger().severe(e.getMessage());
-			}
+			setLogLevel(levelPropertyValue);
 		}
 		handlers.add(new SystemOutHandler());
+	}
+
+	public static boolean isLoggingConfigFileAvailable() {
+		return System.getProperty("java.util.logging.config.file") == null;
+	}
+
+	public static void setLogLevel(String levelPropertyValue) {
+		String level = Arrays.
+				asList("debug", "info", "warning").stream().
+				filter(l -> levelPropertyValue.equals(l)).
+				findAny().
+				orElse("info");
+		try {
+			LogManager.getLogManager().readConfiguration(Log.class.getResourceAsStream("logging." + level + ".properties"));
+		} catch (final IOException e) {
+			Logger.getAnonymousLogger().severe("Could not load default logging.properties file");
+			Logger.getAnonymousLogger().severe(e.getMessage());
+		}
 	}
 
 	public static void addHandler(Handler handler) {
