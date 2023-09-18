@@ -90,6 +90,9 @@ public interface NodeBuilder {
 	public NodeBuilder addChild(ReferenceInfo ref);
 	public NodeBuilder addTextChild(String text);
 	public String getTextContent();
+	public default Optional<String> getTextContentOpt() {
+		return Optional.ofNullable(getTextContent());
+	}
 	public boolean isTextNode();
 	public NodeBuilder createTextElement(String content);
 	public NodeBuilder setTextContent(String innerText);
