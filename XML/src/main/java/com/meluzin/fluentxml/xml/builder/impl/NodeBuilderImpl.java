@@ -37,8 +37,10 @@ public class NodeBuilderImpl implements NodeBuilder {
 	private String content;
 	private String cdata;
 	private NodeBuilderImpl parent;
+	private List<String> comments = new ArrayList<>();
 	private Map<String, String> namespaces = new HashMap<String, String>();
 	private Map<String, Map<String, String>> prefixedAttributes = new HashMap<String, Map<String, String>>();
+	private Map<String, String> finalAttributes = new LinkedHashMap<String, String>();
 	private List<NodeBuilder> children = new ArrayList<NodeBuilder>();
 	protected XmlBuilderFactory factory;
 	private boolean textNode = false;
@@ -58,13 +60,13 @@ public class NodeBuilderImpl implements NodeBuilder {
 	}
 	@Override
 	public NodeBuilder addNamespace(String namespace) {
-		namespaces.put(null, namespace);
-		return this;
+		return addNamespace(null, namespace);
 	}
 
 	@Override
 	public NodeBuilder addNamespace(String prefix, String namespace) {
 		namespaces.put(prefix, namespace);
+		finalAttributes.put("xmlns"+(prefix==null?"":":"+prefix), namespace);
 		return this;
 	}
 
@@ -79,6 +81,7 @@ public class NodeBuilderImpl implements NodeBuilder {
 		{ 
 			if (!prefixedAttributes.containsKey(prefix)) prefixedAttributes.put(prefix, new LinkedHashMap<String, String>());			
 			prefixedAttributes.get(prefix).put(name, value);
+			finalAttributes.put((prefix == null ? "" :prefix+":")+name, value);
 		}
 		return this;
 	}
@@ -587,7 +590,16 @@ public class NodeBuilderImpl implements NodeBuilder {
 					return Optional.of(getXPath() + " - other has "+ (other.children.size() - children.size()) + " more children");
 				}
 			}
-			/*if (parent == null) {
+			if (!getComments().equals(other.getComments())) {
+				if (this.getComments().size() > 0 && !(other.getComments().size() > 0)) {
+					return Optional.of(getXPath() + " - this has comment: "+other.getComments());
+				} else if (!(this.getComments().size() > 0) && other.getComments().size() > 0) {
+					return Optional.of(getXPath() + " - other has comment: "+other.getComments());
+				} else {
+					return Optional.of(getXPath() + " - comment differs: "+this.getComments() + " != "+other.getComments());
+				}
+			}
+			/*if (parent +== null) {
 				if (other.parent != null)
 					return false;
 			} else if (!parent.equals(other.parent))
@@ -694,7 +706,19 @@ public class NodeBuilderImpl implements NodeBuilder {
 		}
 		if (textNode != other.textNode)
 			return false;
+		if (!comments.equals(other.getComments())) {
+			return false;
+		}
 		return true;
+	}
+	@Override
+	public List<String> getComments() {
+		return comments;
+	}
+	@Override
+	public NodeBuilder addComment(String comment) {
+		this.comments.add(comment);
+		return this;
 	}
 	protected String getOtherAttributeValue(NodeBuilderImpl other, V3<String, String, String> thisAttributeWithValue) {
 		return other.prefixedAttributes.getOrDefault(thisAttributeWithValue.getA(), new HashMap<>()).get(thisAttributeWithValue.getB());
@@ -777,5 +801,9 @@ public class NodeBuilderImpl implements NodeBuilder {
 	public NodeBuilder clearProcessingInstructions() {
 		processingInstructions.clear();
 		return this;
+	}
+	@Override
+	public Map<String, String> getFinalAttributes() {
+		return finalAttributes;
 	}
 }

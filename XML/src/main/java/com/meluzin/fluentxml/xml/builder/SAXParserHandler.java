@@ -2,19 +2,26 @@ package com.meluzin.fluentxml.xml.builder;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import javax.xml.parsers.SAXParser;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
+import org.xml.sax.ext.LexicalHandler;
 import org.xml.sax.helpers.DefaultHandler;
 
-final class SAXParserHandler extends DefaultHandler {
+import com.meluzin.functional.T;
+
+final class SAXParserHandler extends DefaultHandler implements LexicalHandler {
 	private NodeBuilder current;
 	private SAXParseException error;
 	private SAXParseException fatalError;
 	private XmlBuilderFactory factory;
+	private List<String> comments = new ArrayList<>();
 	public NodeBuilder load(XmlBuilderFactory factory, InputStream input, SAXParser parser) throws SAXException, IOException {
 		this.factory = factory;
 		parser.parse(input, this);
@@ -22,6 +29,7 @@ final class SAXParserHandler extends DefaultHandler {
 		if (fatalError != null) throw fatalError;
 		return current;
 	}
+	
 	@Override
 	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 		if (current != null && current.getTextContent() != null) {
@@ -34,11 +42,17 @@ final class SAXParserHandler extends DefaultHandler {
 		else {
 			current = current.addChild(null, localName);
 		}
+		if (comments.size() > 0) {
+			current.getComments().addAll(comments);
+			comments.clear();
+		}
+		Optional<T.V2<String, String>> nodePrefixNamespace = Optional.empty();
 		if (uri != null && uri.length() > 0) {
 			String prefix = qName.contains(":") ? qName.split(":")[0] : null;
 			if (!current.getAllNamespaces().containsValue(uri)) {
-				if (prefix != null) current.addNamespace(prefix, uri);
-				else current.addNamespace(uri);
+				
+				if (prefix != null) nodePrefixNamespace = Optional.of(T.V("xmlns:"+prefix, uri)); //current.addNamespace(prefix, uri);
+				else nodePrefixNamespace = Optional.of(T.V("xmlns", uri));// current.addNamespace(uri);
 			}
 			current.setPrefix(prefix);
 		}
@@ -57,6 +71,10 @@ final class SAXParserHandler extends DefaultHandler {
 	@Override
 	public void endElement(String uri, String localName, String qName) throws SAXException {
 		super.endElement(uri, localName, qName);
+		if (comments.size() > 0) {
+			current.getComments().addAll(comments);
+			comments.clear();
+		}
 		if (current.hasParent()) {
 			current = current.getParent();
 		}
@@ -72,11 +90,13 @@ final class SAXParserHandler extends DefaultHandler {
 	@Override
 	public void characters(char[] ch, int start, int length) throws SAXException {
 		String str = new String(ch, start, length);
-		if (current.hasChildren()) {
-			current.addTextChild(str);
-		}
-		else {
-			current.setTextContent(str);
+		if (str.trim().length() > 0) {
+			if (current.hasChildren()) {
+				current.addTextChild(str);
+			}
+			else {
+				current.setTextContent((current.getTextContent() == null ? "" : current.getTextContent()) + str.replace("\n", System.lineSeparator()));
+			}
 		}
 		super.characters(ch, start, length);
 	}
@@ -89,5 +109,28 @@ final class SAXParserHandler extends DefaultHandler {
 	public void fatalError(SAXParseException e) throws SAXException {
 		this.fatalError = e;
 		super.fatalError(e);
+	}
+
+	@Override
+	public void startDTD(String name, String publicId, String systemId) throws SAXException {}
+
+	@Override
+	public void endDTD() throws SAXException {}
+
+	@Override
+	public void startEntity(String name) throws SAXException {}
+
+	@Override
+	public void endEntity(String name) throws SAXException {}
+
+	@Override
+	public void startCDATA() throws SAXException {}
+
+	@Override
+	public void endCDATA() throws SAXException {}
+
+	@Override
+	public void comment(char[] ch, int start, int length) throws SAXException {
+		comments.add(new String(ch, start, length).replace("\n", System.lineSeparator()));
 	}
 }

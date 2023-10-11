@@ -44,6 +44,7 @@ public interface NodeBuilder {
 	 */
 	public NodeBuilder addAttribute(String prefix, String name, String value);
 	public Map<String, Map<String,String>> getPrefixedAttributes();
+	public Map<String, String> getFinalAttributes();
 	public String getAttribute(String name);
 	public String getAttribute(String prefix, String name);
 	public boolean hasAttribute(String name);
@@ -193,4 +194,7 @@ public interface NodeBuilder {
 	public NodeBuilder sortChildren(Comparator<NodeBuilder> comparator);
 
 	public boolean equalsTo(NodeBuilder other);
+	
+	public NodeBuilder addComment(String comment);
+	public List<String> getComments();
 }

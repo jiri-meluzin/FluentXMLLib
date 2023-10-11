@@ -10,6 +10,9 @@ import static org.junit.Assert.assertThat;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.Optional;
 
 import org.junit.Assert;
@@ -18,6 +21,8 @@ import org.junit.Test;
 import com.meluzin.fluentxml.xml.builder.NodeBuilder;
 import com.meluzin.fluentxml.xml.builder.XmlBuilderFactory;
 import com.meluzin.fluentxml.xml.builder.XmlBuilderSAXFactory;
+import com.meluzin.fluentxml.xml.builder.XmlBuilderSAXFactory.Settings;
+import com.meluzin.functional.FileSearcher;
 public class TestNodeBuilderImpl {
 	@Test
 	public void testPrintHelloWorld() {
@@ -274,5 +279,121 @@ public class TestNodeBuilderImpl {
 		assertThat(element2.getFirstDiff(element), is(Optional.empty()));
 		assertThat(element.getFirstDiff(element2), is(Optional.empty()));
 		assertThat(element2.equalsTo(element), is(true));
+	}
+
+	@Test
+	public void testAttributeStability() {
+		XmlBuilderSAXFactory xmlBuilderSAXFactory = new XmlBuilderSAXFactory();
+		String sourceXml="<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
+				+ "<xsd:element xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" name=\"ErrorRows\" minOccurs=\"0\" />\r\n"
+				+ "";
+		NodeBuilder node = xmlBuilderSAXFactory.parseDocument(sourceXml);
+		assertEquals(sourceXml, node.toString());
+	}
+	@Test
+	public void testAttributeStability2() {
+		XmlBuilderSAXFactory xmlBuilderSAXFactory = new XmlBuilderSAXFactory();
+		String sourceXml=Settings.BOM_CHAR+"<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
+				+ "<xsd:element name=\"ErrorRows\" minOccurs=\"&#xA;&gt;0\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"/>\r\n"
+				+ "";
+		NodeBuilder node = xmlBuilderSAXFactory.parseDocument(sourceXml);
+		assertEquals(sourceXml, node.toString());
+	}
+	@Test
+	public void testAttributeStability3() {
+		XmlBuilderSAXFactory xmlBuilderSAXFactory = new XmlBuilderSAXFactory();
+		String sourceXml="<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
+				+ "<pd:label xmlns:pd=\"a>\">\r\n"
+				+ "    <!-- comment\r\n"
+				+ "     -->\r\n"
+				+ "    <pd:description>Workaround value:\r\n"
+				+ "4, Customer = V1, subscriber = V1, user = V1"
+				+ "</pd:description>\r\n"
+				+ "    <pd:binidngs />\r\n"
+				+ "    <pd:binidngs />\r\n"
+				+ "    <pd:startName>\r\n"
+				+ "        <pd:startName>\r\n"
+				+ "            <pd:startName>Force DR</pd:startName>\r\n"
+				+ "        </pd:startName>\r\n"
+				+ "    </pd:startName>\r\n"
+				+ "    <!-- comment\r\n"
+				+ "     -->\r\n"
+				+ "    <pd:xxx />\r\n"
+				+ "</pd:label>";
+		NodeBuilder node = xmlBuilderSAXFactory.parseDocument(sourceXml);
+		assertEquals(sourceXml, node.toString());
+	}
+	
+	@Test
+	public void testDifferenteFormatting() {
+		XmlBuilderSAXFactory xmlBuilderSAXFactory = new XmlBuilderSAXFactory();
+		String sourceXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
+				+ "<pd:ProcessDefinition xmlns:ipd=\"http://www.vodafone.cz/iProcessDecoupler/xml\"\r\n"
+				+ "                      xmlns:pd=\"http://xmlns.tibco.com/bw/process/2003\"\r\n"
+				+ "                      xmlns:BW=\"java://com.tibco.pe.core.JavaCustomXPATHFunctions\"\r\n"
+				+ "                      xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\"\r\n"
+				+ "                      xmlns:ns=\"http://www.tibco.com/pe/EngineTypes\"\r\n"
+				+ "                      xmlns:ns12=\"http://www.vodafone.cz/Common/xml/Common\"\r\n"
+				+ "                      xmlns:ns5=\"http://www.vodafone.cz/ServiceLayer/Charging/xml/DataTypes/v1_0\"\r\n"
+				+ "                      xmlns:ns6=\"http://www.vodafone.cz/ServiceLayer/ResourceManagement/xml/DataTypes/v1_0\"\r\n"
+				+ "                      xmlns:ns7=\"http://www.vodafone.cz/ServiceLayer/GSMNetwork/xml/DataTypes/v1_0\"\r\n"
+				+ "                      xmlns:pfx=\"http://www.vodafone.cz/ServiceLayer/xml/InterfaceIPE/v1_0\"\r\n"
+				+ "                      xmlns:ns8=\"http://www.vodafone.cz/Orchestration/xml/DataTypes/v1_0\"\r\n"
+				+ "                      xmlns:ns2=\"http://www.tibco.com/namespaces/tnt/plugins/jms\"\r\n"
+				+ "                      xmlns:ns1=\"http://www.tibco.com/pe/DeployedVarsType\"\r\n"
+				+ "                      xmlns:ns4=\"http://www.vodafone.cz/ServiceLayer/xml/InterfaceIPEBase/v1_0\"\r\n"
+				+ "                      xmlns:ns3=\"http://www.vodafone.cz/ServiceLayer/Complex/xml/DataTypes/v1_0\"\r\n"
+				+ "                      xmlns:ns9=\"http://www.vodafone.cz/ServiceLayer/Network/xml/DataTypes/v1_0\"\r\n"
+				+ "                      xmlns:ns10=\"http://www.vodafone.cz/ServiceLayer/InternalSupportingService/xml/DataTypes/v1_0\"\r\n"
+				+ "                      xmlns:ns11=\"http://www.vodafone.cz/ServiceLayer/Crm/xml/DataTypes/v1_0\"\r\n"
+				+ "                      xmlns:ns14=\"http://www.vodafone.cz/ServiceLayer/ThirdPartyService/xml/DataTypes/v1_0\"\r\n"
+				+ "                      xmlns:ns15=\"http://www.vodafone.cz/ServiceLayer/Billing/xml/DataTypes/v1_0\"\r\n"
+				+ "                      xmlns:pfx2=\"http://www.vodafone.cz/Common/xml/Error\"\r\n"
+				+ "                      xmlns:ns16=\"http://www.vodafone.cz/Integration/Schema/iProcessAdapter\">\r\n"
+				+ "   <xs:import xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"\r\n"
+				+ "              namespace=\"http://www.vodafone.cz/ServiceLayer/xml/InterfaceIPE/v1_0\"\r\n"
+				+ "              schemaLocation=\"/Resources/Contracts/Schemas/ServiceLayer/InterfaceIPE_1_0.xsd\"/>\r\n"
+				+ "   <xs:import xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"\r\n"
+				+ "              namespace=\"http://www.vodafone.cz/Common/xml/Error&#34;\"\r\n"
+				+ "              schemaLocation=\"/Resources/Contracts/Schemas/Common/XmlErrorSchema.xsd\"/>\r\n"
+				+ "   <pd:name>Processes/Dispatchers/Billing/BarringForceDelayedRelease.process</pd:name>\r\n"
+				+ "   <pd:startName>\r\n"
+				+ "      <pd:startName>\r\n"
+				+ "         <pd:startName>Force DR</pd:startName>\r\n"
+				+ "      </pd:startName>\r\n"
+				+ "   </pd:startName>\r\n"
+				+ "</pd:ProcessDefinition>\r\n"
+				+ "";
+		NodeBuilder node = xmlBuilderSAXFactory.parseDocument(sourceXml);
+		assertEquals(sourceXml, node.toString());
+	}
+	
+	@Test
+	public void testSAX() {
+//		XmlBuilderSAXFactory fac = new XmlBuilderSAXFactory();
+//		new FileSearcher().iterateFiles(Paths.get("e:/git/integrationsourcecodes/"),"glob:**/*.process", true).parallel().map(p -> {
+//			try {
+//				String readAllBytes = Files.readString(p);
+//				readAllBytes = normalizeEnding(readAllBytes);
+//				NodeBuilder loadFromFile = fac.loadFromFile(p);
+//				String string = loadFromFile.toString();
+//				string = normalizeEnding(string);
+//				if (!readAllBytes.equals(string)) {
+//					System.out.println(p + " diff");
+//					Files.write(p, string.getBytes(), StandardOpenOption.TRUNCATE_EXISTING);
+//				} else {
+//					System.out.println(p);
+//				}
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//			return p;
+//		}).forEach(p -> System.out.println(p));
+	}
+	private String normalizeEnding(String readAllBytes) {
+		if (readAllBytes.charAt(readAllBytes.length() - 1) == '\n') readAllBytes = readAllBytes.substring(0, readAllBytes.length() - 1);
+		if (readAllBytes.charAt(readAllBytes.length() - 1) == '\r') readAllBytes = readAllBytes.substring(0, readAllBytes.length() - 1);
+		return readAllBytes;
 	}
 }
