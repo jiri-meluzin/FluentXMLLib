@@ -5,6 +5,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
@@ -52,7 +54,7 @@ public class XmlBuilderSAXFactory extends XmlBuilderFactory {
 	public String renderNode(NodeBuilder node, boolean prettyPrint) {
 		try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
 			renderNode(node, prettyPrint, output);
-			return new String(output.toByteArray());
+			return new String(output.toByteArray(), StandardCharsets.UTF_8);
 		} catch (IOException e) {
 			throw new RuntimeException("Could not render XML document", e);
 		}
@@ -63,7 +65,7 @@ public class XmlBuilderSAXFactory extends XmlBuilderFactory {
 	@Override
 	public NodeBuilder parseDocument(InputStream input) {
 		try (InputStream inputStream = input) {
-			String data = IOUtils.toString(input);
+			String data = IOUtils.toString(input, StandardCharsets.UTF_8);
 			String recognizedCharset = data.substring(0, data.indexOf('\n')-1).trim().replaceAll(".*\\<\\?xml version\\s*=\\s*\\\"1.0\\\" encoding\\s*=\\s*\\\"([^\\\"]+)\\\".*", "$1");
 			boolean isTherePlainGreaterThenInAttribute = comparePattern(data, "(?s)=\\\"[^\\\"]*>[^\\\"]*\\\"", "(?s)=\\\"[^\\\"]*&gt;[^\\\"]*\\\"") > 0;
 			boolean isOldFormatting = comparePattern(data, "(?s)>(\r?)\n   <","(?s)>(\r?)\n    <") > 0;
@@ -72,10 +74,11 @@ public class XmlBuilderSAXFactory extends XmlBuilderFactory {
 						data.endsWith("\r\n") ? EndOfFileType.Windows:
 							data.endsWith("\n") ? EndOfFileType.Linux:
 								EndOfFileType.None;
+			boolean isBom = data.startsWith(""+(char)Settings.BOM_CHAR);
 			Settings settings = Settings.builder().
 					spaceInEmptyTag(data.contains(" />")).
 					charset(recognizedCharset).
-					BOM(data.startsWith(""+(char)Settings.BOM_CHAR)).
+					BOM(isBom).
 					escapeGreaterThanChar(!isTherePlainGreaterThenInAttribute).
 					oldFormatting(isOldFormatting).
 					newLineAtTheEnd(isNewLineAtTheEnd).
@@ -87,7 +90,7 @@ public class XmlBuilderSAXFactory extends XmlBuilderFactory {
 			XMLReader xmlReader = saxParser.getXMLReader();
 			SAXParserHandler handler = new SAXParserHandler();
 			xmlReader.setProperty("http://xml.org/sax/properties/lexical-handler", handler);
-			ByteArrayInputStream input2 = new ByteArrayInputStream(data.getBytes());
+			ByteArrayInputStream input2 = new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8));
 			NodeBuilder node = handler.load(this, input2, saxParser);
 			settingsMap.put(node, settings);
 			return node;
@@ -121,7 +124,7 @@ public class XmlBuilderSAXFactory extends XmlBuilderFactory {
 		private static final Settings DEFAULTS = Settings.builder().build();
 		public static final char BOM_CHAR = (char)65279;
 		@Builder.Default
-		private boolean spaceInEmptyTag = true;
+		private boolean spaceInEmptyTag = false;
 		@Builder.Default
 		private String charset = "UTF-8";
 		@Builder.Default

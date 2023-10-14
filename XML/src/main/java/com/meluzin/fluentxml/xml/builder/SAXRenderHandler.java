@@ -31,7 +31,7 @@ public class SAXRenderHandler {
 
 	public void render(NodeBuilder root, OutputStream stream, boolean prettyStream)
 			throws XMLStreamException, FactoryConfigurationError, IOException {
-		try (OutputStreamWriter writer = new OutputStreamWriter(stream)) {
+		try (OutputStreamWriter writer = new OutputStreamWriter(stream,getSettings().getCharset())) {
 			XMLOutputFactory factory = XMLOutputFactory.newInstance();
 			XMLStreamWriter xmlWriter = factory.createXMLStreamWriter(writer);
 
