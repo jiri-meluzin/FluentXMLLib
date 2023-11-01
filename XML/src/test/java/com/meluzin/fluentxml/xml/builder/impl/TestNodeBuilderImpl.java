@@ -323,6 +323,18 @@ public class TestNodeBuilderImpl {
 		NodeBuilder node = xmlBuilderSAXFactory.parseDocument(sourceXml);
 		assertEquals(sourceXml, node.toString());
 	}
+	@Test
+	public void testXmlns() {
+		XmlBuilderSAXFactory xmlBuilderSAXFactory = new XmlBuilderSAXFactory();
+		NodeBuilder node = xmlBuilderSAXFactory.parseDocument("<a:label xmlns:a=\"somenamespace\" />");
+		assertEquals(node.getNamespace(), "somenamespace");
+		node = xmlBuilderSAXFactory.parseDocument("<label xmlns=\"somenamespace\" />");
+		assertEquals(node.getNamespace(), "somenamespace");
+		node = xmlBuilderSAXFactory.parseDocument("<a:label xmlns=\"somenamespace\" xmlns:a=\"somenamespace\" />");
+		assertEquals(node.getNamespace(), "somenamespace");
+		node = xmlBuilderSAXFactory.parseDocument("<aa:label xmlns=\"somenamespaceXXXX\" xmlns:aa=\"somenamespace\" />");
+		assertEquals(node.getNamespace(), "somenamespace");
+	}
 	
 	@Test
 	public void testDifferenteFormatting() {

@@ -66,7 +66,7 @@ public class XmlBuilderSAXFactory extends XmlBuilderFactory {
 	public NodeBuilder parseDocument(InputStream input) {
 		try (InputStream inputStream = input) {
 			String data = IOUtils.toString(input, StandardCharsets.UTF_8);
-			String recognizedCharset = data.substring(0, data.indexOf('\n')-1).trim().replaceAll(".*\\<\\?xml version\\s*=\\s*\\\"1.0\\\" encoding\\s*=\\s*\\\"([^\\\"]+)\\\".*", "$1");
+			String recognizedCharset = (data.contains("\n")? data.substring(0, data.indexOf('\n')-1):data).trim().replaceAll(".*\\<\\?xml version\\s*=\\s*\\\"1.0\\\" encoding\\s*=\\s*\\\"([^\\\"]+)\\\".*", "$1");
 			boolean isTherePlainGreaterThenInAttribute = comparePattern(data, "(?s)=\\\"[^\\\"]*>[^\\\"]*\\\"", "(?s)=\\\"[^\\\"]*&gt;[^\\\"]*\\\"") > 0;
 			boolean isOldFormatting = comparePattern(data, "(?s)>(\r?)\n   <","(?s)>(\r?)\n    <") > 0;
 			EndOfFileType isNewLineAtTheEnd =

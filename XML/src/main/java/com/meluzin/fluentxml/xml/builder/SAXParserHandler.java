@@ -63,6 +63,8 @@ final class SAXParserHandler extends DefaultHandler implements LexicalHandler {
 			String name = qn.contains(":") ? qn.split(":")[1] : qn;
 			if ("xmlns".equals(pref)) {
 				current.addNamespace(name, val);
+			} else if (pref == null && "xmlns".equals(name)) {
+				current.addNamespace(val);
 			}
 			else current.addAttribute(pref, name, val);
 		}
