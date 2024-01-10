@@ -334,6 +334,10 @@ public class TestNodeBuilderImpl {
 		assertEquals(node.getNamespace(), "somenamespace");
 		node = xmlBuilderSAXFactory.parseDocument("<aa:label xmlns=\"somenamespaceXXXX\" xmlns:aa=\"somenamespace\" />");
 		assertEquals(node.getNamespace(), "somenamespace");
+		node = xmlBuilderSAXFactory.parseDocument("<aa:label xmlns=\"somenamespaceXXXX\" xmlns:aa=\"somenamespace\"><aa:x /></aa:label>");
+		assertEquals(node.getNamespace(), "somenamespace");
+		node = xmlBuilderSAXFactory.parseDocument("<aa:label xmlns=\"somenamespaceXXXX\" xmlns:aa=\"somenamespace\"><aa:x /></aa:label>").searchFirstByName("x");
+		assertEquals(node.getNamespace(), "somenamespace");
 	}
 	
 	@Test

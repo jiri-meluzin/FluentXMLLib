@@ -73,6 +73,20 @@ public interface NodeBuilder {
 	public default NodeBuilder addChild(AddChildActionReturn action) {
 		return action.exec(this);
 	}
+	public default Stream<NodeBuilder> getParentsToRoot() {
+		NodeBuilder parent = getParent();
+		if (parent == null) return Stream.empty();
+		else return Stream.concat(Stream.of(parent), parent.getParentsToRoot());
+	}
+	public default Optional<NodeBuilder> searchAnyParent(String name) {
+		return searchAnyParent(getPrefix(), name);
+	}
+	public default Optional<NodeBuilder> searchAnyParent(String prefix, String name) {
+		NodeBuilder parent = getParent();
+		if (parent == null) return Optional.empty();
+		if (parent.getName().equals(name) && (prefix == null ? parent.getPrefix() == null : prefix.equals(parent.getPrefix()))) return Optional.of(parent);
+		return parent.searchAnyParent(prefix, name);
+	}
 	public <T> NodeBuilder addChild(T item, AddChildFunctor<T> functor);
 	public NodeBuilder removeChild(int index);
 	public NodeBuilder removeChild(NodeBuilder child);
