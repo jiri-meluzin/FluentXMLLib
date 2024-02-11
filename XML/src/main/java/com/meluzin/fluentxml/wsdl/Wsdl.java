@@ -49,6 +49,7 @@ public interface Wsdl extends BaseSchema {
 	public interface Binding extends NamedEntity<Binding> {
 		public ReferenceInfo getType();		
 		public Collection<BindingOperation> getOperations();
+		public Optional<String> getSoapTransport();
 	}
 	public interface BindingOperation extends NamedEntity<BindingOperation> {
 		public Binding getBinding();
