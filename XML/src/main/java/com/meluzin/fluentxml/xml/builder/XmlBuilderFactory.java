@@ -40,6 +40,11 @@ import com.meluzin.fluentxml.xml.builder.impl.NodeBuilderImpl;
 import com.meluzin.functional.Log;
 
 
+/**
+ * The XmlBuilderFactory class provides methods for creating XML documents and rendering them.
+ * It allows you to build XML structures using a fluent API and provides options for preserving whitespace,
+ * setting namespaces, adding attributes, and more.
+ */
 public class XmlBuilderFactory {
 	private boolean preserveWhitespace = false;
 	

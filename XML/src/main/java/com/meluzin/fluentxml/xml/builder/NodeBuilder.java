@@ -1,3 +1,7 @@
+/**
+ * The NodeBuilder interface represents a builder for XML nodes.
+ * It provides methods for manipulating XML nodes, such as adding attributes, adding child nodes, and retrieving information about the node.
+ */
 package com.meluzin.fluentxml.xml.builder;
 
 import java.util.Comparator;
@@ -10,7 +14,16 @@ import java.util.stream.Stream;
 
 import com.meluzin.fluentxml.xml.xsd.XmlNode.ReferenceInfo;
 
+/**
+ * The NodeBuilder interface represents a builder for XML nodes.
+ * It provides methods for manipulating and constructing XML nodes.
+ */
 public interface NodeBuilder {
+	/**
+	 * Returns a map of processing instructions associated with this node.
+	 *
+	 * @return a map of processing instructions, where the key is the target and the value is the data.
+	 */
 	public Map<String, String> getProcessingInstructions();
 	public NodeBuilder addProcessingInstruction(String name, String value);
 	public NodeBuilder clearProcessingInstructions();

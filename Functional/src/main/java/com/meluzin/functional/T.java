@@ -16,6 +16,9 @@ public class T {
 	public static <A, B, C, D, E> V5<A, B, C, D, E> V(A a, B b, C c, D d, E e) {
 		return new V5<A, B, C, D, E>(a, b, c, d, e);
 	}
+	public static <A, B, C, D, E, F> V6<A, B, C, D, E, F> V(A a, B b, C c, D d, E e, F f) {
+		return new V6<A, B, C, D, E, F>(a, b, c, d, e, f);
+	}
 	public static <A, B> V2<A, B> copyAndAdd(V1<A> a, B b) {
 		return new V2<A, B>(a.getA(), b);
 	}
@@ -27,6 +30,9 @@ public class T {
 	}
 	public static <A, B, C, D, E> V5<A, B, C, D, E> copyAndAdd(V4<A, B, C, D> v, E e) {
 		return new V5<A, B, C, D, E>(v.getA(), v.getB(), v.getC(), v.getD(), e);
+	}
+	public static <A, B, C, D, E, F> V6<A, B, C, D, E, F> copyAndAdd(V5<A, B, C, D, E> v, F f) {
+		return new V6<A, B, C, D, E, F>(v.getA(), v.getB(), v.getC(), v.getD(), v.getE(), f);
 	}
 	@SuppressWarnings("unchecked")
 	public static <A> int compareProp(A a, A oa) {
@@ -383,6 +389,96 @@ public class T {
 			if (comparePropD != 0) return comparePropD;
 			int comparePropE = compareProp(getE(), oa.getE());
 			if (comparePropE != 0) return comparePropE;
+			return 0;
+		}
+	}
+	public static class V6<A, B, C, D, E, F> extends V5<A, B, C, D, E>{
+		private F f;
+		public V6(A a, B b, C c, D d, E e, F f) {
+			super(a, b, c, d, e);
+			this.f = f;
+		}
+		public F getF() {
+			return f;
+		}
+		public V6<A, B, C, D, E, F> setF(F f) {
+			this.f = f;
+			return this;
+		}
+		@SuppressWarnings("unchecked")
+		@Override
+		public V6<A, B, C, D, E, F> setA(A a) {
+			return (V6<A, B, C, D, E, F>)super.setA(a);
+		}
+		@SuppressWarnings("unchecked")
+		@Override
+		public V6<A, B, C, D, E, F> setB(B b) {
+			return (V6<A, B, C, D, E, F>)super.setB(b);
+		}
+		@SuppressWarnings("unchecked")
+		@Override
+		public V6<A, B, C, D, E, F> setC(C c) {
+			return (V6<A, B, C, D, E, F>)super.setC(c);
+		}
+		@SuppressWarnings("unchecked")
+		@Override
+		public V6<A, B, C, D, E, F> setD(D d) {
+			return (V6<A, B, C, D, E, F>)super.setD(d);
+		}
+		@SuppressWarnings("unchecked")
+		@Override
+		public V6<A, B, C, D, E, F> setE(E e) {
+			return (V6<A, B, C, D, E, F>)super.setE(e);
+		}
+		@Override
+		public String toString() {
+			return super.toString() + ";F="+f;
+		}
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = super.hashCode();
+			result = prime * result + ((f == null) ? 0 : f.hashCode());
+			return result;
+		}
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (!super.equals(obj))
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			V6<?,?,?,?,?,?> other = (V6<?,?,?,?,?,?>) obj;
+			if (f == null) {
+				if (other.f != null)
+					return false;
+			} else if (!f.equals(other.f))
+				return false;
+			return true;
+		}
+		@SuppressWarnings("unchecked")
+		@Override
+		public int compareTo(Object o) {
+			if (o == null) return -1;
+			V6<A,B,C,D,E,F> oa;
+			if (!(o instanceof V6<?,?,?,?,?,?>)) {
+				return toString().compareTo(o.toString());
+			} else {
+				oa = (V6<A,B,C,D,E,F>)o;
+			}
+			int comparePropA = compareProp(getA(), oa.getA());
+			if (comparePropA != 0) return comparePropA;
+			int comparePropB = compareProp(getB(), oa.getB());
+			if (comparePropB != 0) return comparePropB;
+			int comparePropC = compareProp(getC(), oa.getC());
+			if (comparePropC != 0) return comparePropC;
+			int comparePropD = compareProp(getD(), oa.getD());
+			if (comparePropD != 0) return comparePropD;
+			int comparePropE = compareProp(getE(), oa.getE());
+			if (comparePropE != 0) return comparePropE;
+			int comparePropF = compareProp(getF(), oa.getF());
+			if (comparePropF != 0) return comparePropF;
 			return 0;
 		}
 	}
