@@ -4,9 +4,6 @@ package com.meluzin.functional;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.lang.StackWalker.StackFrame;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -47,30 +44,28 @@ public final class CustomerFormatter extends Formatter {
 			} catch (IOException e) {
 			}
 		}
-		Optional<StackFrame> foundStack = new CallerFinder().get();
+		Optional<StackTraceElement> foundStack = new CallerFinder().get();
 		String foundMethod = foundStack.map(u -> u.getMethodName()).orElse("N/A method");
 		String foundClassName = foundStack.map(u -> u.getClassName()).orElse("N/A class");
 		return Log.LOG_DATETIME_FORMATTER.format(date) 
-				+" ["+getThreadName(paramLogRecord.getLongThreadID()).map(s -> s.replace("ForkJoinPool.commonPool-worker", "FJP")).orElse(paramLogRecord.getLongThreadID()+"")+"]"
+				+" ["+getThreadName(paramLogRecord.getThreadID()).map(s -> s.replace("ForkJoinPool.commonPool-worker", "FJP")).orElse(paramLogRecord.getThreadID()+"")+"]"
 				+" [" + abbreviateClassName(foundClassName,20) + ":"
 				+ foundMethod + "] [" + paramLogRecord.getLevel() + "] "
 				+ paramLogRecord.getMessage() + stackTrace + "\n";
 	}
     @SuppressWarnings("removal")
-    static final class CallerFinder implements Predicate<StackWalker.StackFrame> {
-        private static final StackWalker WALKER;
+    static final class CallerFinder implements Predicate<StackTraceElement> {
+        private static final StackTraceElement[] stackTrace;
         static {
-            final PrivilegedAction<StackWalker> action =
-                () -> StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE);
-            WALKER = AccessController.doPrivileged(action);
+            stackTrace = new Throwable().getStackTrace();
         }
 
         /**
          * Returns StackFrame of the caller's frame.
          * @return StackFrame of the caller's frame.
          */
-        Optional<StackWalker.StackFrame> get() {
-            return WALKER.walk((s) -> s.filter(this).findFirst());
+        Optional<StackTraceElement> get() {
+            return Arrays.asList(stackTrace).stream().filter(this).findFirst();
         }
 
         private boolean lookingForLogger = true;
@@ -83,7 +78,7 @@ public final class CustomerFormatter extends Formatter {
          * must be skipped.
          */
         @Override
-        public boolean test(StackWalker.StackFrame t) {
+        public boolean test(StackTraceElement t) {
             final String cname = t.getClassName();
             // We should skip all frames until we have found the logger,
             // because these frames could be frames introduced by e.g. custom
@@ -97,11 +92,11 @@ public final class CustomerFormatter extends Formatter {
             // Skips logging/logger infrastructure.
             return !isFilteredFrame(t);
         }
-        static boolean isFilteredFrame(StackFrame st) {
+        static boolean isFilteredFrame(StackTraceElement st) {
             // skip logging/logger infrastructure
-            if (System.Logger.class.isAssignableFrom(st.getDeclaringClass())) {
-                return true;
-            }
+//            if (System.Logger.class.isAssignableFrom(st.getDeclaringClass())) {
+//                return true;
+//            }
 
             // fast escape path: all the prefixes below start with 's' or 'j' and
             // have more than 12 characters.
