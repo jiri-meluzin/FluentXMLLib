@@ -53,19 +53,14 @@ public final class CustomerFormatter extends Formatter {
 				+ foundMethod + "] [" + paramLogRecord.getLevel() + "] "
 				+ paramLogRecord.getMessage() + stackTrace + "\n";
 	}
-    @SuppressWarnings("removal")
     static final class CallerFinder implements Predicate<StackTraceElement> {
-        private static final StackTraceElement[] stackTrace;
-        static {
-            stackTrace = new Throwable().getStackTrace();
-        }
 
         /**
          * Returns StackFrame of the caller's frame.
          * @return StackFrame of the caller's frame.
          */
         Optional<StackTraceElement> get() {
-            return Arrays.asList(stackTrace).stream().filter(this).findFirst();
+            return Arrays.asList(new Throwable().getStackTrace()).stream().filter(this).findFirst();
         }
 
         private boolean lookingForLogger = true;

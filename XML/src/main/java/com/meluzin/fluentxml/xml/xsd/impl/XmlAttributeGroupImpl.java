@@ -2,15 +2,11 @@ package com.meluzin.fluentxml.xml.xsd.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.meluzin.fluentxml.xml.builder.NodeBuilder;
 import com.meluzin.fluentxml.xml.xsd.XmlNode;
 import com.meluzin.fluentxml.xml.xsd.XmlNode.XmlAttributeGroup;
-import com.meluzin.fluentxml.xml.xsd.XmlNode.XmlChoice;
-import com.meluzin.fluentxml.xml.xsd.XmlNode.XmlElement;
 
 public class XmlAttributeGroupImpl extends BaseXmlNode<XmlAttributeGroup> implements XmlAttributeGroup {
 	private String name;

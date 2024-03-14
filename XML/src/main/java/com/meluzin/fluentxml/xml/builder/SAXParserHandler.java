@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import javax.xml.parsers.SAXParser;
 
@@ -13,8 +12,6 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.ext.LexicalHandler;
 import org.xml.sax.helpers.DefaultHandler;
-
-import com.meluzin.functional.T;
 
 final class SAXParserHandler extends DefaultHandler implements LexicalHandler {
 	private NodeBuilder current;
@@ -46,14 +43,8 @@ final class SAXParserHandler extends DefaultHandler implements LexicalHandler {
 			current.getComments().addAll(comments);
 			comments.clear();
 		}
-		Optional<T.V2<String, String>> nodePrefixNamespace = Optional.empty();
 		if (uri != null && uri.length() > 0) {
 			String prefix = qName.contains(":") ? qName.split(":")[0] : null;
-			if (!current.getAllNamespaces().containsValue(uri)) {
-				
-				if (prefix != null) nodePrefixNamespace = Optional.of(T.V("xmlns:"+prefix, uri)); //current.addNamespace(prefix, uri);
-				else nodePrefixNamespace = Optional.of(T.V("xmlns", uri));// current.addNamespace(uri);
-			}
 			current.setPrefix(prefix);
 		}
 		for (int i = 0; i < attributes.getLength(); i++) {

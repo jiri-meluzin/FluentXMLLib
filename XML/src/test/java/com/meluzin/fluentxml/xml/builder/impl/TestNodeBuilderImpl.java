@@ -10,9 +10,6 @@ import static org.junit.Assert.assertThat;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.Optional;
 
 import org.junit.Assert;
@@ -22,8 +19,8 @@ import com.meluzin.fluentxml.xml.builder.NodeBuilder;
 import com.meluzin.fluentxml.xml.builder.XmlBuilderFactory;
 import com.meluzin.fluentxml.xml.builder.XmlBuilderSAXFactory;
 import com.meluzin.fluentxml.xml.builder.XmlBuilderSAXFactory.Settings;
-import com.meluzin.functional.FileSearcher;
 public class TestNodeBuilderImpl {
+	@SuppressWarnings("unused")
 	@Test
 	public void testPrintHelloWorld() {
 		XmlBuilderFactory fac = getFactory();
@@ -50,6 +47,7 @@ public class TestNodeBuilderImpl {
 		String renderNode2 = new XmlBuilderFactory().renderNode(new XmlBuilderFactory().createRootElement("x").addProcessingInstruction("xml-stylesheet", "type=\"text/xsl\" href=\"build-log.xsl\""), false);
 		assertEquals(renderNode2, "<?xml version=\"1.0\" encoding=\"UTF-8\"?><?xml-stylesheet type=\"text/xsl\" href=\"build-log.xsl\"?><x/>");
 	}
+	@SuppressWarnings("unused")
 	@Test
 	public void test3PrintHelloWorld() {
 		XmlBuilderFactory fac = getFactory();
@@ -64,6 +62,7 @@ public class TestNodeBuilderImpl {
 		}
 		
 	}
+	@SuppressWarnings("unused")
 	@Test
 	public void test2PrintHelloWorld() {
 		XmlBuilderFactory fac = getFactory();
@@ -106,6 +105,7 @@ public class TestNodeBuilderImpl {
 		Assert.assertTrue(z1 == nb.get());		
 	}
 	
+	@SuppressWarnings("unused")
 	@Test
 	public void testFindNodeWithSameLocation2() {
 		XmlBuilderFactory fac = new XmlBuilderFactory();
@@ -117,6 +117,7 @@ public class TestNodeBuilderImpl {
 		Assert.assertTrue(!nb.isPresent());	
 	}
 
+	@SuppressWarnings("unused")
 	@Test
 	public void testFindNodeWithSameLocation3() {
 		XmlBuilderFactory fac = new XmlBuilderFactory();
@@ -127,6 +128,7 @@ public class TestNodeBuilderImpl {
 		Optional<NodeBuilder> nb = n1.findNodeWithSameLocation(z);
 		Assert.assertTrue(!nb.isPresent());	
 	}
+	@SuppressWarnings("unused")
 	@Test
 	public void testFindNodeWithSameLocation4() {
 		XmlBuilderFactory fac = new XmlBuilderFactory();
@@ -384,32 +386,32 @@ public class TestNodeBuilderImpl {
 		assertEquals(sourceXml, node.toString());
 	}
 	
-	@Test
-	public void testSAX() {
-//		XmlBuilderSAXFactory fac = new XmlBuilderSAXFactory();
-//		new FileSearcher().iterateFiles(Paths.get("e:/git/integrationsourcecodes/"),"glob:**/*.process", true).parallel().map(p -> {
-//			try {
-//				String readAllBytes = Files.readString(p);
-//				readAllBytes = normalizeEnding(readAllBytes);
-//				NodeBuilder loadFromFile = fac.loadFromFile(p);
-//				String string = loadFromFile.toString();
-//				string = normalizeEnding(string);
-//				if (!readAllBytes.equals(string)) {
-//					System.out.println(p + " diff");
-//					Files.write(p, string.getBytes(), StandardOpenOption.TRUNCATE_EXISTING);
-//				} else {
-//					System.out.println(p);
-//				}
-//			} catch (IOException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//			return p;
-//		}).forEach(p -> System.out.println(p));
-	}
-	private String normalizeEnding(String readAllBytes) {
-		if (readAllBytes.charAt(readAllBytes.length() - 1) == '\n') readAllBytes = readAllBytes.substring(0, readAllBytes.length() - 1);
-		if (readAllBytes.charAt(readAllBytes.length() - 1) == '\r') readAllBytes = readAllBytes.substring(0, readAllBytes.length() - 1);
-		return readAllBytes;
-	}
+//	@Test
+//	public void testSAX() {
+////		XmlBuilderSAXFactory fac = new XmlBuilderSAXFactory();
+////		new FileSearcher().iterateFiles(Paths.get("e:/git/integrationsourcecodes/"),"glob:**/*.process", true).parallel().map(p -> {
+////			try {
+////				String readAllBytes = Files.readString(p);
+////				readAllBytes = normalizeEnding(readAllBytes);
+////				NodeBuilder loadFromFile = fac.loadFromFile(p);
+////				String string = loadFromFile.toString();
+////				string = normalizeEnding(string);
+////				if (!readAllBytes.equals(string)) {
+////					System.out.println(p + " diff");
+////					Files.write(p, string.getBytes(), StandardOpenOption.TRUNCATE_EXISTING);
+////				} else {
+////					System.out.println(p);
+////				}
+////			} catch (IOException e) {
+////				// TODO Auto-generated catch block
+////				e.printStackTrace();
+////			}
+////			return p;
+////		}).forEach(p -> System.out.println(p));
+//	}
+//	private String normalizeEnding(String readAllBytes) {
+//		if (readAllBytes.charAt(readAllBytes.length() - 1) == '\n') readAllBytes = readAllBytes.substring(0, readAllBytes.length() - 1);
+//		if (readAllBytes.charAt(readAllBytes.length() - 1) == '\r') readAllBytes = readAllBytes.substring(0, readAllBytes.length() - 1);
+//		return readAllBytes;
+//	}
 }

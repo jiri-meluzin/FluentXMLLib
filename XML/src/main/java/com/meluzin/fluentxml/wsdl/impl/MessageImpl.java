@@ -3,7 +3,6 @@ package com.meluzin.fluentxml.wsdl.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.meluzin.fluentxml.wsdl.Wsdl.Message;

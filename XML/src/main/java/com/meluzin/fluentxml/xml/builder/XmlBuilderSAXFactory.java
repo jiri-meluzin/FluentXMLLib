@@ -5,7 +5,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
@@ -21,12 +20,10 @@ import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.commons.io.IOUtils;
-import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
 import lombok.Builder;
-import lombok.Builder.Default;
 import lombok.Getter;
 
 public class XmlBuilderSAXFactory extends XmlBuilderFactory {
@@ -110,7 +107,6 @@ public class XmlBuilderSAXFactory extends XmlBuilderFactory {
 	}
 
 	private static int comparePattern(String data, String positivePattern, String negativePattern) {
-		String regex = "(?s)=\\\"[^\\\"]*>[^\\\"]*\\\"";
 		return detectPattern(data, positivePattern)-detectPattern(data, negativePattern);
 	}
 	public static void main(String[] args) {
@@ -118,7 +114,6 @@ public class XmlBuilderSAXFactory extends XmlBuilderFactory {
 	}
 
 	@Builder
-	@SuppressWarnings("unused")
 	@Getter
 	public static class Settings {
 		private static final Settings DEFAULTS = Settings.builder().build();

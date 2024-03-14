@@ -1,6 +1,6 @@
 package com.meluzin.fluentxml.xml.builder;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
 

@@ -1,8 +1,5 @@
 package com.meluzin.fluentxml.xml.xsd.impl;
 
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import com.meluzin.fluentxml.xml.builder.NodeBuilder;
 import com.meluzin.fluentxml.xml.xsd.XmlNode;
 import com.meluzin.fluentxml.xml.xsd.XmlNode.XmlAny;

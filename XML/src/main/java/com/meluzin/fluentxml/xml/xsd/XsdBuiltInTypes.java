@@ -4,8 +4,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.meluzin.fluentxml.xml.builder.BaseSchema.SchemaType;
-import com.meluzin.fluentxml.xml.builder.SchemaReference;
 import com.meluzin.fluentxml.xml.builder.XmlBuilderFactory;
 import com.meluzin.fluentxml.xml.xsd.XmlNode.XmlSchema;
 

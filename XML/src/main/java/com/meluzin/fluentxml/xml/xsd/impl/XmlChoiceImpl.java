@@ -2,16 +2,11 @@ package com.meluzin.fluentxml.xml.xsd.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.meluzin.fluentxml.xml.builder.NodeBuilder;
 import com.meluzin.fluentxml.xml.xsd.XmlNode;
-import com.meluzin.fluentxml.xml.xsd.XmlNode.XmlAny;
 import com.meluzin.fluentxml.xml.xsd.XmlNode.XmlChoice;
-import com.meluzin.fluentxml.xml.xsd.XmlNode.XmlElement;
-import com.meluzin.fluentxml.xml.xsd.XmlNode.XmlGroup;
 
 public class XmlChoiceImpl extends BaseXmlNode<XmlChoice> implements XmlChoice {
 	private List<XmlNode<?>> elements = new ArrayList<>();

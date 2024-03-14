@@ -3,9 +3,7 @@ package com.meluzin.fluentxml.xml.builder;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.nio.charset.CharsetEncoder;
 
-import javax.xml.namespace.NamespaceContext;
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -162,7 +160,6 @@ public class SAXRenderHandler {
 					if (name.contains(":")) {
 						String[] nameParts = name.split(":");
 						String pref = nameParts[0];
-						String namespace = pref.equals("xmlns") ? "http://www.w3.org/2000/xmlns/" : root.getNamespace(pref);
 						attributeRendered = pref + ":" + nameParts[1] + "=\"" + escapeAttChars(value) + "\"";
 					} else {
 						attributeRendered = name + "=\"" + escapeAttChars(value) + "\"";

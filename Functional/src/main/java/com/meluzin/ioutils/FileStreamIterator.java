@@ -201,7 +201,6 @@ public class FileStreamIterator implements Iterator<Path> {
 	}
 
 	public static void main(String[] args) {
-		int count = 0;
 		while (true) {
 			V1<Integer> v = T.V(0);
 			Instant now = Instant.now();
