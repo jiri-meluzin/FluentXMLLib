@@ -8,8 +8,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.Optional;
 
 import org.junit.Assert;
@@ -18,7 +20,9 @@ import org.junit.Test;
 import com.meluzin.fluentxml.xml.builder.NodeBuilder;
 import com.meluzin.fluentxml.xml.builder.XmlBuilderFactory;
 import com.meluzin.fluentxml.xml.builder.XmlBuilderSAXFactory;
+import com.meluzin.fluentxml.xml.builder.XmlBuilderSAXFactory.EndOfFileType;
 import com.meluzin.fluentxml.xml.builder.XmlBuilderSAXFactory.Settings;
+import com.meluzin.functional.FileSearcher;
 public class TestNodeBuilderImpl {
 	@SuppressWarnings("unused")
 	@Test
@@ -414,4 +418,38 @@ public class TestNodeBuilderImpl {
 //		if (readAllBytes.charAt(readAllBytes.length() - 1) == '\r') readAllBytes = readAllBytes.substring(0, readAllBytes.length() - 1);
 //		return readAllBytes;
 //	}
+	
+	@Test
+	public void testSubstvarFile() {
+		String toBeFile = "<?xml version = \"1.0\" encoding = \"UTF-8\"?>\r\n"
+		+ "<repository xmlns:xsi = \"http://www.w3.org/2001/XMLSchema-instance\" xmlns = \"http://www.tibco.com/xmlns/repo/types/2002\">\r\n"
+		+ "	<globalVariables>\r\n"
+		+ "		<globalVariable>\r\n"
+		+ "			<name>CompleteServiceItemsQueueName</name>\r\n"
+		+ "			<value>cz.vodafone.orderFulfilment.completeService.items</value>\r\n"
+		+ "			<deploymentSettable>true</deploymentSettable>\r\n"
+		+ "			<serviceSettable>false</serviceSettable>\r\n"
+		+ "			<type>String</type>\r\n"
+		+ "			<modTime>1553784780758</modTime>\r\n"
+		+ "		</globalVariable>\r\n"
+		+ "	</globalVariables>\r\n"
+		+ "</repository>";
+		ByteArrayOutputStream output = new ByteArrayOutputStream();
+		XmlBuilderSAXFactory.getSingleton().renderNode(XmlBuilderSAXFactory.getSingleton().parseDocument(toBeFile), Settings.builder().padding("\t").spaceAtAttributes(true).newLineAtTheEnd(EndOfFileType.None).build(), true, output);
+		assertEquals(toBeFile, output.toString());
+		
+		new FileSearcher().iterateFiles(Paths.get("e:/git/integrationsourcecodes/V4TIBCO.BW/Ordering/OrderController/src/tibco/OrderController/defaultVars/Constants/Throttler/"), "glob:**/*.substvar", true, true).forEach(p -> {
+
+			NodeBuilder fromFile = XmlBuilderSAXFactory.getSingleton().loadFromFile(p);
+			fromFile.addNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
+			fromFile.search(true, n -> n.getChildren().size() == 0 && n.getTextContent() == null).forEach(n -> n.setTextContent(""));
+			try (FileOutputStream fos = new FileOutputStream(p.toFile())){
+				XmlBuilderSAXFactory.getSingleton().renderNode(fromFile, Settings.builder().padding("\t").spaceAtAttributes(true).newLineAtTheEnd(EndOfFileType.None).build(), true, fos);
+				System.out.println(Thread.currentThread().getId()+":"+ p);
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+				
+		});
+	}
 }

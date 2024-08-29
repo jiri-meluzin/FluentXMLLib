@@ -116,6 +116,8 @@ public class XmlBuilderSAXFactory extends XmlBuilderFactory {
 	@Builder
 	@Getter
 	public static class Settings {
+		@Builder.Default
+		private boolean spaceAtAttributes = false;
 		private static final Settings DEFAULTS = Settings.builder().build();
 		public static final char BOM_CHAR = (char)65279;
 		@Builder.Default

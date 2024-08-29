@@ -36,7 +36,11 @@ public class SAXRenderHandler {
 			try {
 				if (getSettings().isBOM())
 					writer.append(Settings.BOM_CHAR);
-				xmlWriter.writeStartDocument(getSettings().getCharset(), "1.0");
+				if (getSettings().isSpaceAtAttributes()) {
+					writer.write("<?xml version = \"1.0\" encoding = \""+getSettings().getCharset()+"\"?>");
+				} else {
+					xmlWriter.writeStartDocument(getSettings().getCharset(), "1.0");
+				}
 				if (prettyStream)
 					xmlWriter.writeCharacters(LINE_SEPARATOR);
 				render("", root, xmlWriter, prettyStream, writer);
@@ -157,12 +161,13 @@ public class SAXRenderHandler {
 			if (value != null && name != null) {
 				try {
 					String attributeRendered;
+					String attributeSpace = getSettings().isSpaceAtAttributes() ? " " : "";
 					if (name.contains(":")) {
 						String[] nameParts = name.split(":");
 						String pref = nameParts[0];
-						attributeRendered = pref + ":" + nameParts[1] + "=\"" + escapeAttChars(value) + "\"";
+						attributeRendered = pref + ":" + nameParts[1] + attributeSpace+"=" + attributeSpace+"\""+ escapeAttChars(value) + "\"";
 					} else {
-						attributeRendered = name + "=\"" + escapeAttChars(value) + "\"";
+						attributeRendered = name + (getSettings().isSpaceAtAttributes() ? " " : "")+ "=" + attributeSpace+"\""+ escapeAttChars(value) + "\"";
 					}
 					
 					int length = (attributeRendered).length();
